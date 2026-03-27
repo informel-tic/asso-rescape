@@ -32,7 +32,7 @@ export async function createAppointment(formData: FormData) {
         },
     });
 
-    revalidatePath("/portail/partenaire");
+    revalidatePath("/admin/dashboard/calendrier");
     return { success: true };
 }
 

@@ -30,5 +30,5 @@ export const authConfig = {
         },
     },
     providers: [], // Add providers with an empty array for now
-    secret: process.env.AUTH_SECRET || "changeme_in_production_secret_key_123",
+    secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig;

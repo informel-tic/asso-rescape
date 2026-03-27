@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Calendar, Tag, ArrowLeft } from "lucide-react";
+import { sanitizeArticleHtml } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic"; // dynamic page, no static generation errors
 
@@ -61,7 +62,7 @@ export default async function ArticlePage({ params }: PageProps) {
                 {/* Content */}
                 <div
                     className="prose prose-lg prose-headings:font-playfair prose-p:font-lato prose-a:text-primary hover:prose-a:text-secondary max-w-none text-dark/80"
-                    dangerouslySetInnerHTML={{ __html: article.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.content) }}
                 />
             </article>
         </div>

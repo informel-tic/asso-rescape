@@ -5,12 +5,13 @@ import { Plus, TrendingUp, TrendingDown, Calendar, Wallet, FileText, ArrowUpRigh
 import { redirect } from "next/navigation";
 import { deleteAccountingEntry } from "@/app/admin/actions/compta";
 import DeleteButton from "./DeleteButton";
+import { hasAdminAccess } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function ComptaDashboard() {
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "DIRECTION"].includes(session.user?.role as string)) {
+    if (!session || !hasAdminAccess(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
 
@@ -104,7 +105,7 @@ export default async function ComptaDashboard() {
                         <tbody className="divide-y divide-slate-100 text-sm">
                             {entries.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-500 font-medium">Àucune écriture comptable pour le moment.</td>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-500 font-medium">Aucune écriture comptable pour le moment.</td>
                                 </tr>
                             ) : (
                                 entries.map((entry) => (

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { MessageSquare, Calendar as CalendarIcon, FileText, ArrowUpRight, Clock, UserCheck, HeartHandshake, CreditCard, Flame } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { hasAdminAccess } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function DashboardPage() {
     if (!session?.user) redirect("/admin");
 
     const role = session.user.role as string || "BENEVOLE";
-    const isDirection = role === "SUPER_ADMIN" || role === "DIRECTION";
+    const isDirection = hasAdminAccess(role);
     const isPartner = role === "PARTENAIRE";
     const isBenevole = role === "BENEVOLE";
 

@@ -47,7 +47,7 @@ export async function createDonation(formData: FormData) {
         data: donationData
     });
 
-    revalidatePath("/portail/partenaire");
+    revalidatePath("/admin/dashboard/dons");
     return { success: true };
 }
 
@@ -56,7 +56,7 @@ export async function getDonations() {
     if (!session?.user) throw new Error("Non autorisé");
 
     const role = session.user.role as string;
-    if (hasAdminAccess(role) || role === "TRESORIERE") {
+    if (hasAdminAccess(role)) {
         return await prisma.donation.findMany({
             include: { user: { select: { organizationName: true, name: true } } },
             orderBy: { date: "desc" }

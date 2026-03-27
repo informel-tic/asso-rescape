@@ -4,13 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { accountingEntrySchema } from "@/lib/validations/accounting";
 import { revalidatePath } from "next/cache";
+import { hasAdminAccess } from "@/lib/roles";
 
 export async function createAccountingEntry(formData: FormData) {
     const session = await auth();
     if (!session?.user) throw new Error("Non autorisé");
 
     const role = session.user.role as string;
-    if (!["SUPER_ADMIN", "DIRECTRICE", "BENEVOLE"].includes(role)) {
+    if (!hasAdminAccess(role)) {
         throw new Error("Action non autorisée pour ce rôle");
     }
 
@@ -35,8 +36,7 @@ export async function createAccountingEntry(formData: FormData) {
         },
     });
 
-    revalidatePath("/portail/benevole");
-    revalidatePath("/portail/tresoriere");
+    revalidatePath("/admin/dashboard/compta");
     return { success: true };
 }
 
@@ -45,12 +45,12 @@ export async function deleteAccountingEntry(id: string) {
     if (!session?.user) throw new Error("Non autorisé");
 
     const role = session.user.role as string;
-    if (!["SUPER_ADMIN", "DIRECTRICE"].includes(role)) {
+    if (!hasAdminAccess(role)) {
         throw new Error("Action non autorisée pour ce rôle");
     }
 
     await prisma.accountingEntry.delete({ where: { id } });
-    revalidatePath("/portail/tresoriere");
+    revalidatePath("/admin/dashboard/compta");
     return { success: true };
 }
 
@@ -59,7 +59,7 @@ export async function getAccountingEntries() {
     if (!session?.user) throw new Error("Non autorisé");
 
     const role = session.user.role as string;
-    if (!["SUPER_ADMIN", "DIRECTRICE", "TRESORIERE"].includes(role)) {
+    if (!hasAdminAccess(role)) {
         throw new Error("Action non autorisée pour ce rôle");
     }
 

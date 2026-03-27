@@ -7,6 +7,16 @@
  */
 import nodemailer from "nodemailer";
 
+/** Escape HTML special characters to prevent XSS in email templates. */
+function escapeHtml(str: string): string {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 function createTransporter() {
     const host = process.env.SMTP_HOST;
 
@@ -61,11 +71,12 @@ export async function sendMail(options: MailOptions): Promise<void> {
 
 /** Envoie un email de confirmation à l'expéditeur du formulaire de contact. */
 export async function sendContactConfirmation(name: string, email: string): Promise<void> {
+    const safeName = escapeHtml(name);
     await sendMail({
         to: email,
         subject: "✅ Votre message a bien été reçu — Association Rescape",
         html: `
-            <p>Bonjour ${name},</p>
+            <p>Bonjour ${safeName},</p>
             <p>Nous avons bien reçu votre message et nous vous répondrons dans les meilleurs délais.</p>
             <p>L'équipe Rescape 🌱</p>
             <hr/>
@@ -83,20 +94,25 @@ export async function sendContactNotification(opts: {
     content: string;
 }): Promise<void> {
     const adminEmail = process.env.ADMIN_EMAIL ?? "delaruevanessa48@gmail.com";
+    const safeName = escapeHtml(opts.name);
+    const safeEmail = escapeHtml(opts.email);
+    const safePhone = escapeHtml(opts.phone ?? "—");
+    const safeSubject = escapeHtml(opts.subject ?? "—");
+    const safeContent = escapeHtml(opts.content).replace(/\n/g, "<br/>");
     await sendMail({
         to: adminEmail,
-        subject: `📩 Nouveau message — ${opts.subject ?? "Contact Rescape"}`,
+        subject: `📩 Nouveau message — ${safeSubject}`,
         replyTo: opts.email,
         html: `
             <h2>Nouveau message via le formulaire de contact</h2>
             <table>
-                <tr><td><strong>Nom :</strong></td><td>${opts.name}</td></tr>
-                <tr><td><strong>Email :</strong></td><td>${opts.email}</td></tr>
-                <tr><td><strong>Téléphone :</strong></td><td>${opts.phone ?? "—"}</td></tr>
-                <tr><td><strong>Objet :</strong></td><td>${opts.subject ?? "—"}</td></tr>
+                <tr><td><strong>Nom :</strong></td><td>${safeName}</td></tr>
+                <tr><td><strong>Email :</strong></td><td>${safeEmail}</td></tr>
+                <tr><td><strong>Téléphone :</strong></td><td>${safePhone}</td></tr>
+                <tr><td><strong>Objet :</strong></td><td>${safeSubject}</td></tr>
             </table>
             <h3>Message :</h3>
-            <p>${opts.content.replace(/\n/g, "<br/>")}</p>
+            <p>${safeContent}</p>
         `,
     });
 }
