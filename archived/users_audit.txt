@@ -1,6 +1,0 @@
-BENEVOLE|benevole@rescape.fr|Jean Bénévole
-DIRECTION|delaruevanessa48@gmail.com|Vanessa Delarue
-DIRECTION|nicolas@rescape.fr|Nicolas Delarue
-DIRECTION|direction@rescape.fr|Directeur Test
-PARTENAIRE|partenaire@rescape.fr|Entreprise Partenaire
-SUPER_ADMIN|rchon@rchon-dev.fr|R. Chon
