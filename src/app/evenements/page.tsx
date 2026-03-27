@@ -1,10 +1,16 @@
 "use client";
 
-import EventsCalendar, { CalendarEvent } from "@/components/features/events/EventsCalendar";
+import dynamic from "next/dynamic";
+import type { CalendarEvent } from "@/components/features/events/EventsCalendar";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getPublicEvents } from "@/actions/events";
 import { Event } from "@prisma/client";
+
+const EventsCalendar = dynamic(
+    () => import("@/components/features/events/EventsCalendar"),
+    { ssr: false, loading: () => <div className="h-96 flex items-center justify-center text-primary/60 font-semibold">Chargement du calendrier...</div> }
+);
 
 export default function EventsPage() {
     const [events, setEvents] = useState<Event[]>([]);

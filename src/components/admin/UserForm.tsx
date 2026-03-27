@@ -144,7 +144,7 @@ export function UserForm({ onClose, user }: UserFormProps) {
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                         className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-700"
-                                        placeholder={user ? "Laisser vide" : "Optionnel"}
+                                        placeholder={user ? "Laisser vide pour ne pas changer" : "Min. 8 caractères (obligatoire)"}
                                     />
                                 </div>
                             </div>

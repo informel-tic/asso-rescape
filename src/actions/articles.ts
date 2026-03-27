@@ -112,6 +112,54 @@ export async function toggleArticleStatus(id: string, currentStatus: boolean) {
         return { error: "Erreur lors de la mise à jour" };
     }
 }
+export async function updateArticle(id: string, formData: FormData) {
+    const session = await auth();
+    if (!session?.user) throw new Error("Non autorisé");
+
+    const role = session.user.role as string;
+    if (!hasAdminAccess(role)) {
+        throw new Error("Action non autorisée");
+    }
+
+    const rawData = {
+        title: formData.get("title"),
+        content: formData.get("content"),
+        excerpt: formData.get("excerpt"),
+        image: formData.get("image"),
+        published: formData.get("published") === "on",
+    };
+
+    const validatedData = ArticleSchema.safeParse(rawData);
+    if (!validatedData.success) {
+        return { error: "Données invalides" };
+    }
+
+    const { title, content, excerpt, image, published } = validatedData.data;
+
+    const existing = await prisma.article.findUnique({ where: { id } });
+    if (!existing) return { error: "Article introuvable" };
+
+    try {
+        await prisma.article.update({
+            where: { id },
+            data: {
+                title,
+                content,
+                excerpt,
+                image,
+                published: published || false,
+                publishedAt: published && !existing.publishedAt ? new Date() : existing.publishedAt,
+            },
+        });
+    } catch {
+        return { error: "Erreur lors de la mise à jour de l'article" };
+    }
+
+    revalidatePath("/admin/dashboard/articles");
+    revalidatePath("/blog");
+    redirect("/admin/dashboard/articles");
+}
+
 export async function getLatestArticles() {
     try {
         const articles = await prisma.article.findMany({

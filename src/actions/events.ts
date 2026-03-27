@@ -72,6 +72,43 @@ export async function deleteEvent(id: string) {
 }
 
 // Ne retourner que les événements publiés sur la page publique
+export async function updateEvent(id: string, formData: FormData) {
+    const session = await auth();
+    if (!session?.user) throw new Error("Non autorisé");
+
+    const role = session.user.role as string;
+    if (!hasAdminAccess(role)) {
+        throw new Error("Action non autorisée");
+    }
+
+    const rawData = {
+        title: formData.get("title"),
+        start: formData.get("start"),
+        end: formData.get("end"),
+        location: formData.get("location"),
+        description: formData.get("description"),
+        status: formData.get("status") ?? "PUBLISHED",
+    };
+
+    const validatedData = EventSchema.safeParse(rawData);
+    if (!validatedData.success) {
+        return { error: "Données invalides" };
+    }
+
+    try {
+        await prisma.event.update({
+            where: { id },
+            data: validatedData.data,
+        });
+        revalidatePath("/admin/dashboard/events");
+        revalidatePath("/evenements");
+        redirect("/admin/dashboard/events");
+    } catch (error) {
+        console.error("Update event error:", error);
+        return { error: "Erreur lors de la mise à jour" };
+    }
+}
+
 export async function getPublicEvents() {
     noStore();
     try {

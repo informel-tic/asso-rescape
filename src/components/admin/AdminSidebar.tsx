@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
     LayoutDashboard, FileText, Calendar, Users,
     MessageSquare, Calculator, Settings, Activity,
-    Clock, ShieldCheck, Package, CreditCard, Briefcase
+    Clock, ShieldCheck, Package, CreditCard, Briefcase, Lock
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { isDirectionRole, isSuperAdmin } from "@/lib/roles";
@@ -233,6 +233,12 @@ export function AdminSidebar({ role, label, userName }: AdminSidebarProps) {
                         <p className="text-[10px] font-semibold text-emerald-600 truncate uppercase mt-0.5">{label}</p>
                     </div>
                 </div>
+                <Link href="/admin/dashboard/profil" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all group mb-2 ${pathname.startsWith("/admin/dashboard/profil") ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-50"}`}>
+                    <div className={`p-1.5 rounded-md transition-colors ${pathname.startsWith("/admin/dashboard/profil") ? "bg-slate-800 text-indigo-400" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>
+                        <Lock className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm">Mon profil</span>
+                </Link>
                 <LogoutSidebarButton />
             </div>
         </aside>

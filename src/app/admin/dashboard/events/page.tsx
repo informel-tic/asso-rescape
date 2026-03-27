@@ -54,8 +54,13 @@ export default async function EventsPage() {
                                             })}
                                         </td>
                                         <td className="p-5 text-sm font-medium text-slate-500 truncate max-w-xs">{event.location || "-"}</td>
-                                        <td className="p-5 text-right whitespace-nowrap">
-                                            <form action={async () => { "use server"; await deleteEvent(event.id); }}>
+                                        <td className="p-5 text-right whitespace-nowrap space-x-2">
+                                            <Link href={`/admin/dashboard/events/${event.id}`}>
+                                                <Button variant="outline" size="sm" className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-100 transition-all font-semibold">
+                                                    Modifier
+                                                </Button>
+                                            </Link>
+                                            <form action={async () => { "use server"; await deleteEvent(event.id); }} className="inline-block">
                                                 <Button variant="ghost" size="sm" className="rounded-xl text-red-600 hover:bg-red-50 font-semibold transition-all">
                                                     Supprimer
                                                 </Button>

@@ -9,14 +9,16 @@ datasource db {
 
 
 model User {
-  id               String            @id @default(cuid())
-  email            String            @unique
-  password         String
-  name             String?
-  role             String            @default("BENEVOLE") // SUPER_ADMIN, DIRECTION, BENEVOLE, PARTENAIRE
-  organizationName String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id                  String            @id @default(cuid())
+  email               String            @unique
+  password            String
+  name                String?
+  role                String            @default("BENEVOLE") // SUPER_ADMIN, DIRECTION, BENEVOLE, PARTENAIRE
+  organizationName    String?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   appointments     Appointment[]
   donations        Donation[]
   accountingEntries AccountingEntry[]

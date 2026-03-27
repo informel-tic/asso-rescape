@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { hasAdminAccess } from "@/lib/roles";
 import { sendContactNotification, sendContactConfirmation } from "@/lib/mailer";
 import { contactSchema } from "@/lib/validations/contact";
+import { headers } from "next/headers";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * Fonction de sanitisation simple pour éviter les injections HTML/PHP
@@ -19,6 +21,13 @@ function sanitize(str: string) {
 }
 
 export async function createMessage(formData: FormData) {
+    // Rate limit: 5 submissions per 10 minutes per IP
+    const headersList = await headers();
+    const ip = headersList.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+    if (!rateLimit(`contact:${ip}`, { limit: 5, windowSec: 600 })) {
+        return { error: "Trop de messages envoyés. Réessayez dans 10 minutes." };
+    }
+
     const rawPhone = formData.get("phone") as string;
     // Nettoyage spécifique pour le téléphone (uniquement garder les chiffres)
     const sanitizedPhone = rawPhone ? rawPhone.replace(/[\s.]/g, "") : "";

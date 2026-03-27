@@ -40,7 +40,10 @@ export async function createUser(data: { name: string; email: string; role: stri
         throw new Error("Seul un administrateur système peut créer un compte de type Super Admin");
     }
 
-    const hashedPassword = await bcrypt.hash(data.password || "admin123", 10);
+    if (!data.password || data.password.length < 8) {
+        throw new Error("Un mot de passe d'au moins 8 caractères est requis");
+    }
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const user = await prisma.user.create({
         data: {
@@ -167,4 +170,28 @@ export async function updateUser(userId: string, data: { name?: string; email?: 
 
     revalidatePath("/admin/dashboard/users");
     return user;
+}
+
+export async function changeMyPassword(currentPassword: string, newPassword: string) {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Non autorisé");
+
+    if (newPassword.length < 8) {
+        return { error: "Le nouveau mot de passe doit faire au moins 8 caractères" };
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!user) return { error: "Utilisateur introuvable" };
+
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isValid) {
+        return { error: "Mot de passe actuel incorrect" };
+    }
+
+    await prisma.user.update({
+        where: { id: user.id },
+        data: { password: await bcrypt.hash(newPassword, 10) },
+    });
+
+    return { success: true };
 }
