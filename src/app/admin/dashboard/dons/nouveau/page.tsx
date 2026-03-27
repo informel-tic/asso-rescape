@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { isDirectionRole } from "@/lib/roles";
 import DonForm from "./form";
 
 export const dynamic = "force-dynamic";
@@ -13,8 +14,8 @@ export default async function NouveauDonPage() {
 
     const role = session.user.role as string;
 
-    // For DIRECTION/SUPER_ADMIN, they can register on behalf of any partner
-    const partners = ["SUPER_ADMIN", "DIRECTION"].includes(role)
+    // For direction roles, they can register on behalf of any partner
+    const partners = isDirectionRole(role)
         ? await prisma.user.findMany({
             where: { role: "PARTENAIRE" },
             select: { id: true, name: true, email: true, organizationName: true },
@@ -38,7 +39,7 @@ export default async function NouveauDonPage() {
             </div>
 
             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-                <DonForm userId={session.user.id as string} partners={partners} isAdmin={["SUPER_ADMIN", "DIRECTION"].includes(role)} />
+                <DonForm userId={session.user.id as string} partners={partners} isAdmin={isDirectionRole(role)} />
             </div>
         </div>
     );

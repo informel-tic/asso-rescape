@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { MessageSquare, Calendar as CalendarIcon, FileText, ArrowUpRight, Clock, UserCheck, HeartHandshake, CreditCard, Flame } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { hasAdminAccess } from "@/lib/roles";
+import { hasAdminAccess, isTresorier } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,7 @@ export default async function DashboardPage() {
 
     const role = session.user.role as string || "BENEVOLE";
     const isDirection = hasAdminAccess(role);
+    const isTresoriere = isTresorier(role);
     const isPartner = role === "PARTENAIRE";
     const isBenevole = role === "BENEVOLE";
 
@@ -142,27 +143,57 @@ export default async function DashboardPage() {
                                 </h2>
                             </div>
                             <div className="p-4 flex flex-col gap-2 relative z-10">
-                                <Link href="/admin/dashboard/articles/new" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-emerald-600 transition-colors"><FileText className="w-4 h-4" /></div>
-                                        <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Rédiger un article</span>
-                                    </div>
-                                    <ArrowUpRight className="w-4 h-4 text-emerald-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
-                                </Link>
-                                <Link href="/admin/dashboard/events/new" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-blue-600 transition-colors"><CalendarIcon className="w-4 h-4" /></div>
-                                        <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Nouvel événement</span>
-                                    </div>
-                                    <ArrowUpRight className="w-4 h-4 text-blue-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
-                                </Link>
-                                <Link href="/admin/dashboard/compta" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-amber-600 transition-colors"><CreditCard className="w-4 h-4" /></div>
-                                        <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Comptabilité & Dons</span>
-                                    </div>
-                                    <ArrowUpRight className="w-4 h-4 text-amber-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
-                                </Link>
+                                {isTresoriere ? (
+                                    // Actions Trésorière : finances uniquement
+                                    <>
+                                        <Link href="/admin/dashboard/compta/new" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-amber-600 transition-colors"><CreditCard className="w-4 h-4" /></div>
+                                                <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Saisir une écriture</span>
+                                            </div>
+                                            <ArrowUpRight className="w-4 h-4 text-amber-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
+                                        </Link>
+                                        <Link href="/admin/dashboard/adherents" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-indigo-600 transition-colors"><UserCheck className="w-4 h-4" /></div>
+                                                <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Adhérents & Cotisations</span>
+                                            </div>
+                                            <ArrowUpRight className="w-4 h-4 text-indigo-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
+                                        </Link>
+                                        <Link href="/admin/dashboard/dons" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-emerald-600 transition-colors"><HeartHandshake className="w-4 h-4" /></div>
+                                                <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Dons Physiques</span>
+                                            </div>
+                                            <ArrowUpRight className="w-4 h-4 text-emerald-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
+                                        </Link>
+                                    </>
+                                ) : (
+                                    // Actions Direction : articles, événements, compta
+                                    <>
+                                        <Link href="/admin/dashboard/articles/new" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-emerald-600 transition-colors"><FileText className="w-4 h-4" /></div>
+                                                <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Rédiger un article</span>
+                                            </div>
+                                            <ArrowUpRight className="w-4 h-4 text-emerald-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
+                                        </Link>
+                                        <Link href="/admin/dashboard/events/new" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-blue-600 transition-colors"><CalendarIcon className="w-4 h-4" /></div>
+                                                <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Nouvel événement</span>
+                                            </div>
+                                            <ArrowUpRight className="w-4 h-4 text-blue-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
+                                        </Link>
+                                        <Link href="/admin/dashboard/compta" className="bg-slate-800/50 hover:bg-slate-800 p-4 rounded-2xl flex items-center justify-between transition-all outline-none group/action border border-slate-700/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-slate-700 rounded-lg group-hover/action:bg-amber-600 transition-colors"><CreditCard className="w-4 h-4" /></div>
+                                                <span className="font-semibold text-sm text-slate-200 group-hover/action:text-white">Comptabilité & Dons</span>
+                                            </div>
+                                            <ArrowUpRight className="w-4 h-4 text-amber-400 opacity-0 group-hover/action:opacity-100 group-hover/action:translate-x-0.5 group-hover/action:-translate-y-0.5 transition-all" />
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

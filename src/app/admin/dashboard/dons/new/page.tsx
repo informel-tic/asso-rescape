@@ -1,15 +1,15 @@
-import { Plus, Gift } from "lucide-react";
+import { ArrowLeft, Gift } from "lucide-react";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { hasAdminAccess } from "@/lib/roles";
 import AdminDonationForm from "./form";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewAdminDonationPage() {
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "DIRECTION", "TRESORIERE"].includes(session.user?.role as string)) {
+    if (!session || !hasAdminAccess(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
 
@@ -33,6 +33,3 @@ export default async function NewAdminDonationPage() {
         </div>
     );
 }
-
-// ArrowLeft import issue fixed here inline since I forgot it at the top
-import { ArrowLeft } from "lucide-react";

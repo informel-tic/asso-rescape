@@ -27,7 +27,15 @@ export default auth((req) => {
             return Response.redirect(new URL("/admin/dashboard", req.nextUrl));
         }
 
-        // La TRESORIERE : uniquement compta, adhérents, dons + fonctions bénévole
+        // La TRESORIERE : uniquement compta, adhérents (lecture), dons + fonctions bénévole
+        // Bloquer explicitement les routes de création/édition interdites
+        const tresorierBlockedRoutes = [
+            "/admin/dashboard/adherents/new",
+        ];
+        if (isTresorier(role) && tresorierBlockedRoutes.some(r => path.startsWith(r))) {
+            return Response.redirect(new URL("/admin/dashboard/adherents", req.nextUrl));
+        }
+
         const tresorierRoutes = [
             "/admin/dashboard",
             "/admin/dashboard/compta",

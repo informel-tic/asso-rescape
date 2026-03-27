@@ -127,6 +127,12 @@ export function UserForm({ onClose, user }: UserFormProps) {
                                 >
                                     <option value="BENEVOLE">Bénévole</option>
                                     <option value="PARTENAIRE">Partenaire</option>
+                                    <option value="TRESORIERE">Trésorière</option>
+                                    <option value="TRESORIER">Trésorier</option>
+                                    <option value="DIRECTRICE">Directrice</option>
+                                    <option value="DIRECTEUR">Directeur</option>
+                                    <option value="DIRECTEUR ADJOINT">Directeur Adjoint</option>
+                                    <option value="DIRECTRICE ADJOINTE">Directrice Adjointe</option>
                                     <option value="DIRECTION">Direction</option>
                                     <option value="SUPER_ADMIN">Super Admin</option>
                                 </select>

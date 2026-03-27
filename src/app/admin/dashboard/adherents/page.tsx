@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Plus, CreditCard, CheckCircle2, XCircle, Users, Calendar } from "lucide-react";
 import { redirect } from "next/navigation";
 import MembershipDeleteButton from "./DeleteButton";
-import { isDirectionRole } from "@/lib/roles";
+import { isDirectionRole, isTresorier } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,8 @@ export default async function AdherentsPage() {
     if (!session || !isDirectionRole(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
+
+    const readOnly = isTresorier(session.user?.role as string);
 
     const memberships = await prisma.membership.findMany({
         orderBy: { createdAt: "desc" },
@@ -35,12 +37,14 @@ export default async function AdherentsPage() {
                     </h1>
                     <p className="text-slate-500 mt-2 font-medium">Gestion des cartes annuelles (15€/an, facultatif).</p>
                 </div>
-                <div className="relative z-10">
-                    <Link href="/admin/dashboard/adherents/new" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2">
-                        <Plus className="w-4 h-4" />
-                        Ajouter un adhérent
-                    </Link>
-                </div>
+                {!readOnly && (
+                    <div className="relative z-10">
+                        <Link href="/admin/dashboard/adherents/new" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2">
+                            <Plus className="w-4 h-4" />
+                            Ajouter un adhérent
+                        </Link>
+                    </div>
+                )}
             </div>
 
             {/* KPI Cards */}
@@ -86,7 +90,7 @@ export default async function AdherentsPage() {
                                 <th className="px-6 py-4">N° Carte</th>
                                 <th className="px-6 py-4 text-right">Montant</th>
                                 <th className="px-6 py-4 text-center">Statut</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                {!readOnly && <th className="px-6 py-4 text-right">Actions</th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm">
@@ -128,9 +132,11 @@ export default async function AdherentsPage() {
                                             </span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <MembershipDeleteButton id={m.id} />
-                                    </td>
+                                    {!readOnly && (
+                                        <td className="px-6 py-4 text-right">
+                                            <MembershipDeleteButton id={m.id} />
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>

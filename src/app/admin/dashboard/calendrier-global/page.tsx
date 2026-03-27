@@ -9,8 +9,6 @@ const MegaCalendar = nextDynamic(
     { ssr: false, loading: () => <div className="h-96 flex items-center justify-center text-slate-400 font-semibold">Chargement du calendrier...</div> }
 );
 
-export const dynamic = "force-dynamic";
-
 export default async function GlobalCalendarPage() {
     const session = await auth();
     if (!session?.user || !isDirectionRole(session.user.role as string)) {
