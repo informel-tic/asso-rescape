@@ -1,0 +1,13 @@
+﻿
+> rescape-web@0.1.0 lint
+> eslint
+
+
+E:\Asso-Rescape\rescape-web\src\actions\articles.ts
+  57:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Asso-Rescape\rescape-web\src\app\(admin)\login\page.tsx
+  33:18  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

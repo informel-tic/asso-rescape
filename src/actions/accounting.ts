@@ -1,0 +1,70 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { accountingEntrySchema } from "@/lib/validations/accounting";
+import { revalidatePath } from "next/cache";
+
+export async function createAccountingEntry(formData: FormData) {
+    const session = await auth();
+    if (!session?.user) throw new Error("Non autorisé");
+
+    const role = session.user.role as string;
+    if (!["SUPER_ADMIN", "DIRECTRICE", "BENEVOLE"].includes(role)) {
+        throw new Error("Action non autorisée pour ce rôle");
+    }
+
+    const rawData = {
+        type: formData.get("type"),
+        amount: parseFloat(formData.get("amount") as string),
+        category: formData.get("category"),
+        description: formData.get("description"),
+        date: formData.get("date"),
+    };
+
+    const validated = accountingEntrySchema.safeParse(rawData);
+    if (!validated.success) {
+        return { error: "Données invalides" };
+    }
+
+    await prisma.accountingEntry.create({
+        data: {
+            ...validated.data,
+            date: new Date(validated.data.date),
+            createdById: session.user.id!,
+        },
+    });
+
+    revalidatePath("/portail/benevole");
+    revalidatePath("/portail/tresoriere");
+    return { success: true };
+}
+
+export async function deleteAccountingEntry(id: string) {
+    const session = await auth();
+    if (!session?.user) throw new Error("Non autorisé");
+
+    const role = session.user.role as string;
+    if (!["SUPER_ADMIN", "DIRECTRICE"].includes(role)) {
+        throw new Error("Action non autorisée pour ce rôle");
+    }
+
+    await prisma.accountingEntry.delete({ where: { id } });
+    revalidatePath("/portail/tresoriere");
+    return { success: true };
+}
+
+export async function getAccountingEntries() {
+    const session = await auth();
+    if (!session?.user) throw new Error("Non autorisé");
+
+    const role = session.user.role as string;
+    if (!["SUPER_ADMIN", "DIRECTRICE", "TRESORIERE"].includes(role)) {
+        throw new Error("Action non autorisée pour ce rôle");
+    }
+
+    return await prisma.accountingEntry.findMany({
+        orderBy: { date: "desc" },
+        include: { createdBy: { select: { name: true } } }
+    });
+}

@@ -1,0 +1,6 @@
+DIRECTION|delaruevanessa48@gmail.com|$2b$10$IrbKA91yA5wwBsZnaa/w5.w
+PARTENAIRE|partenaire@rescape.fr|$2b$10$dByTC9RhhePYDwt4PUMO8ul
+BENEVOLE|benevole@rescape.fr|$2b$10$8x8lwOEdfIeTwCLR3/jfL.A
+SUPER_ADMIN|rchon@rchon-dev.fr|$2b$10$D4AnsmRajw77LNNdGJsLL.5
+DIRECTION|nicolas@rescape.fr|$2b$10$BHC2GKTTLREL5WYdzOtGTOE
+DIRECTION|direction@rescape.fr|$2b$10$gPfGqt2RRXREb.W5mpuBcur

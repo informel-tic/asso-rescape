@@ -1,0 +1,34 @@
+﻿
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mE:/Asso-Rescape[39m
+
+ [32m✓[39m src/__tests__/unit/validations/accounting.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/__tests__/unit/validations/appointment-donation.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/__tests__/unit/validations/contact.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/__tests__/security/roles.security.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 168[2mms[22m[39m
+ [31m❯[39m src/__tests__/ui/Navbar.test.tsx [2m([22m[2m14 tests[22m[2m | [22m[31m9 failed[39m[2m)[22m[33m 1357[2mms[22m[39m
+     [32m✓[39m should display the Rescape logo as public site brand[32m 127[2mms[22m[39m
+     [32m✓[39m should show public navigation links (Notre Histoire, Actions, Actualités)[32m 265[2mms[22m[39m
+     [32m✓[39m should NOT show admin dashboard links when unauthenticated[32m 117[2mms[22m[39m
+[31m     [31m×[31m should display 'Rescape Admin' as branded logo when DIRECTRICE[39m[32m 14[2mms[22m[39m
+[31m     [31m×[31m should show portal navigation (Articles, Événements, Messagerie)[39m[32m 182[2mms[22m[39m
+[31m     [31m×[31m should NOT show public nav links (Notre Histoire) in portal mode[39m[32m 91[2mms[22m[39m
+     [32m✓[39m should show a Logout button[32m 39[2mms[22m[39m
+[31m     [31m×[31m should display 'Rescape Bénévole' as branded logo[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m should show portal links: Agenda, Compta[39m[32m 137[2mms[22m[39m
+     [32m✓[39m should NOT show articles management links for BENEVOLE[32m 82[2mms[22m[39m
+[31m     [31m×[31m should display 'Rescape Partenaire' as branded logo[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m should show partner portal links: RDV, Dons[39m[32m 134[2mms[22m[39m
+[31m     [31m×[31m should display 'Rescape Compta' as branded logo[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m should show treasurer portal links: Comptabilité, Export[39m[32m 144[2mms[22m[39m
+ [32m✓[39m src/__tests__/ui/ContactForm.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 5743[2mms[22m[39m
+     [33m[2m✓[22m[39m should update the counter in real-time as the user types [33m 349[2mms[22m[39m
+     [33m[2m✓[22m[39m should turn counter green when 50+ chars reached [33m 802[2mms[22m[39m
+     [33m[2m✓[22m[39m should show success confirmation after valid submission [33m 1807[2mms[22m[39m
+     [33m[2m✓[22m[39m should show validation error when message is too short [33m 847[2mms[22m[39m
+     [33m[2m✓[22m[39m should disable the submit button while loading [33m 1610[2mms[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m78 passed[39m[22m[90m (87)[39m
+[2m   Start at [22m 17:57:52
+[2m   Duration [22m 7.54s[2m (transform 805ms, setup 969ms, import 1.30s, tests 7.30s, environment 5.96s)[22m
+
