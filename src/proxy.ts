@@ -46,8 +46,6 @@ export default auth((req) => {
 
     const isLoginPath = path.startsWith("/admin/login");
     const isAdminPath = path.startsWith("/admin") && !isLoginPath;
-    const isPortailPath = path.startsWith("/portail");
-
     if (isLoginPath) {
         if (isLoggedIn && role) {
             return Response.redirect(new URL(DEFAULT_REDIRECT, req.nextUrl));
@@ -55,17 +53,16 @@ export default auth((req) => {
         return;
     }
 
-    if (!isLoggedIn && (isAdminPath || isPortailPath)) {
+    if (!isLoggedIn && isAdminPath) {
         return Response.redirect(new URL("/admin/login", req.nextUrl));
     }
 
     if (isLoggedIn && role) {
-        // We removed roleRedirects since everyone goes to /admin/dashboard first
-        // Interdire l'accès à /portail pour tous une fois migré
-        if (isPortailPath) {
+        // Keep authenticated users on the dashboard entry point.
+        if (path === "/admin") {
             return Response.redirect(new URL(DEFAULT_REDIRECT, req.nextUrl));
         }
-    } else if (isLoggedIn && !role && (isAdminPath || isPortailPath)) {
+    } else if (isLoggedIn && !role && isAdminPath) {
         return Response.redirect(new URL("/", req.nextUrl));
     }
 });

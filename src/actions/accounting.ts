@@ -4,14 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { accountingEntrySchema } from "@/lib/validations/accounting";
 import { revalidatePath } from "next/cache";
-import { hasAdminAccess } from "@/lib/roles";
+import { isDirectionRole } from "@/lib/roles";
 
 export async function createAccountingEntry(formData: FormData) {
     const session = await auth();
     if (!session?.user) throw new Error("Non autorisé");
 
     const role = session.user.role as string;
-    if (!hasAdminAccess(role)) {
+    if (!isDirectionRole(role)) {
         throw new Error("Action non autorisée pour ce rôle");
     }
 
@@ -45,7 +45,7 @@ export async function deleteAccountingEntry(id: string) {
     if (!session?.user) throw new Error("Non autorisé");
 
     const role = session.user.role as string;
-    if (!hasAdminAccess(role)) {
+    if (!isDirectionRole(role)) {
         throw new Error("Action non autorisée pour ce rôle");
     }
 
@@ -59,7 +59,7 @@ export async function getAccountingEntries() {
     if (!session?.user) throw new Error("Non autorisé");
 
     const role = session.user.role as string;
-    if (!hasAdminAccess(role)) {
+    if (!isDirectionRole(role)) {
         throw new Error("Action non autorisée pour ce rôle");
     }
 

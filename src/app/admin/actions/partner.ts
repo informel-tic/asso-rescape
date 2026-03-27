@@ -3,10 +3,11 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { isDirectionRole } from "@/lib/roles";
 
 export async function togglePartnerHighlight(id: string, isHighlighted: boolean) {
     const session = await auth();
-    if (!session?.user || !(["SUPER_ADMIN", "DIRECTION"].includes(session.user.role as string))) {
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
         throw new Error("Unauthorized");
     }
 

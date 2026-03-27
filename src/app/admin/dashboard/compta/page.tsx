@@ -5,13 +5,13 @@ import { Plus, TrendingUp, TrendingDown, Calendar, Wallet, FileText, ArrowUpRigh
 import { redirect } from "next/navigation";
 import { deleteAccountingEntry } from "@/app/admin/actions/compta";
 import DeleteButton from "./DeleteButton";
-import { hasAdminAccess } from "@/lib/roles";
+import { isDirectionRole } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function ComptaDashboard() {
     const session = await auth();
-    if (!session || !hasAdminAccess(session.user?.role as string)) {
+    if (!session || !isDirectionRole(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
 

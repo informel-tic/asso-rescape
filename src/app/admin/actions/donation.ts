@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { isDirectionRole } from "@/lib/roles";
 
 async function checkAuth() {
     const session = await auth();
@@ -13,8 +14,7 @@ async function checkAuth() {
 // Admin can register donations on behalf of any user (e.g., walk-in donation)
 export async function createDonation(formData: FormData) {
     const session = await checkAuth();
-    const allowedRoles = ["SUPER_ADMIN", "DIRECTION", "PARTENAIRE"];
-    if (!allowedRoles.includes(session.user!.role as string)) {
+    if (!isDirectionRole(session.user!.role as string)) {
         throw new Error("Unauthorized");
     }
 
@@ -38,7 +38,7 @@ export async function createDonation(formData: FormData) {
 
 export async function deleteDonation(id: string) {
     const session = await auth();
-    if (!session?.user || !["SUPER_ADMIN", "DIRECTION"].includes(session.user.role as string)) {
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
         throw new Error("Unauthorized");
     }
 

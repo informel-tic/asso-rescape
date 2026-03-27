@@ -20,12 +20,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
             authorize: async (credentials) => {
                 const { email, password } = await loginSchema.parseAsync(credentials);
+                const normalizedEmail = email.toLowerCase().trim();
 
                 const user = await prisma.user.findUnique({
-                    where: { email },
+                    where: { email: normalizedEmail },
                 });
 
+                // No user or ADHERENT users cannot sign in
                 if (!user) return null;
+                if (user.role && user.role.toUpperCase() === "ADHERENT") return null;
 
                 const passwordsMatch = await bcrypt.compare(password, user.password);
 

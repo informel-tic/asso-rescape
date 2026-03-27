@@ -4,10 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { isDirectionRole } from "@/lib/roles";
 
 export async function createMembership(formData: FormData) {
     const session = await auth();
-    if (!session?.user || !["SUPER_ADMIN", "DIRECTION"].includes(session.user.role as string)) {
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
         throw new Error("Unauthorized");
     }
 
@@ -15,23 +17,26 @@ export async function createMembership(formData: FormData) {
     let newUserId = userId;
 
     // Si on crée un nouvel utilisateur en même temps
-    if (userId === "NEW") {
+        if (userId === "NEW") {
         const name = formData.get("name") as string;
         const email = formData.get("email") as string;
 
         if (!name || !email) throw new Error("Nom et Email requis pour un nouvel adhérent.");
-
-        const defaultPassword = process.env.DEFAULT_MEMBER_PASSWORD || 'Rescape2026!';
-        const hash = await bcrypt.hash(defaultPassword, 10);
+        // Generate a strong random password and store its hash. ADHERENT users
+        // are not allowed to authenticate; this prevents a predictable default.
+        const randomPwd = crypto.randomBytes(32).toString('hex');
+        const hash = await bcrypt.hash(randomPwd, 10);
 
         let user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
+            // Adhérents: use a dedicated role 'ADHERENT' so they are
+            // clearly identified but treated as having NO portal access.
             user = await prisma.user.create({
                 data: {
                     name,
                     email,
                     password: hash,
-                    role: "BENEVOLE"
+                    role: "ADHERENT"
                 }
             });
         }
@@ -78,7 +83,7 @@ export async function createMembership(formData: FormData) {
 
 export async function deleteMembership(id: string) {
     const session = await auth();
-    if (!session?.user || !["SUPER_ADMIN", "DIRECTION"].includes(session.user.role as string)) {
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
         throw new Error("Unauthorized");
     }
 

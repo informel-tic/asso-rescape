@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import nextDynamic from "next/dynamic";
+import { isDirectionRole } from "@/lib/roles";
 
 const MegaCalendar = nextDynamic(
     () => import("@/components/admin/MegaCalendar").then((m) => m.MegaCalendar),
@@ -12,9 +13,7 @@ export const dynamic = "force-dynamic";
 
 export default async function GlobalCalendarPage() {
     const session = await auth();
-    const allowedRoles = ["SUPER_ADMIN", "DIRECTION", "DIRECTRICE", "TRESORIERE"];
-
-    if (!session?.user || typeof session.user.role !== "string" || !allowedRoles.includes(session.user.role)) {
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
         redirect("/admin/dashboard");
     }
 

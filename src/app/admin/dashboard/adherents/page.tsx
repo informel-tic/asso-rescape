@@ -4,12 +4,13 @@ import Link from "next/link";
 import { Plus, CreditCard, CheckCircle2, XCircle, Users, Calendar } from "lucide-react";
 import { redirect } from "next/navigation";
 import MembershipDeleteButton from "./DeleteButton";
+import { isDirectionRole } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdherentsPage() {
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "DIRECTION", "DIRECTRICE"].includes(session.user?.role as string)) {
+    if (!session || !isDirectionRole(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
 

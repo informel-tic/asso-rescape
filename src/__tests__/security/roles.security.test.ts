@@ -41,7 +41,7 @@ describe("Security — Authentication & Authorization", () => {
         });
     });
 
-    describe("BENEVOLE — restricted write-only access", () => {
+    describe("BENEVOLE — restricted access", () => {
         beforeEach(() => {
             mockAuth.mockResolvedValue({ user: { id: "benevole-1", role: "BENEVOLE", email: "benevole@rescape.fr" } } as never);
         });
@@ -59,7 +59,7 @@ describe("Security — Authentication & Authorization", () => {
             await expect(deleteMessage("msg-1")).rejects.toThrow();
         });
 
-        it("should allow BENEVOLE to create an accounting entry", async () => {
+        it("should NOT allow BENEVOLE to create an accounting entry", async () => {
             (mockPrisma.accountingEntry.create as import("vitest").Mock).mockResolvedValue({ id: "acc-1" });
             const { createAccountingEntry } = await import("@/actions/accounting");
             const formData = new FormData();
@@ -68,17 +68,16 @@ describe("Security — Authentication & Authorization", () => {
             formData.set("category", "ACHAT");
             formData.set("description", "Achat de produits alimentaires");
             formData.set("date", new Date().toISOString());
-            const result = await createAccountingEntry(formData);
-            expect(result).not.toHaveProperty("unauthorized");
+            await expect(createAccountingEntry(formData)).rejects.toThrow();
         });
     });
 
-    describe("TRESORIERE — read + export only", () => {
+    describe("TRESORIERE — accounting access", () => {
         beforeEach(() => {
             mockAuth.mockResolvedValue({ user: { id: "tres-1", role: "TRESORIERE", email: "nadia@rescape.fr" } } as never);
         });
 
-        it("should NOT allow TRESORIERE to create an accounting entry", async () => {
+        it("should allow TRESORIERE to create an accounting entry", async () => {
             const { createAccountingEntry } = await import("@/actions/accounting");
             const formData = new FormData();
             formData.set("type", "RECETTE");
@@ -86,12 +85,12 @@ describe("Security — Authentication & Authorization", () => {
             formData.set("category", "DON_RECU");
             formData.set("description", "Test");
             formData.set("date", new Date().toISOString());
-            await expect(createAccountingEntry(formData)).rejects.toThrow();
+            await expect(createAccountingEntry(formData)).resolves.not.toThrow();
         });
 
-        it("should NOT allow TRESORIERE to delete an accounting entry", async () => {
+        it("should allow TRESORIERE to delete an accounting entry", async () => {
             const { deleteAccountingEntry } = await import("@/actions/accounting");
-            await expect(deleteAccountingEntry("entry-1")).rejects.toThrow();
+            await expect(deleteAccountingEntry("entry-1")).resolves.not.toThrow();
         });
 
         it("should allow TRESORIERE to export accounting data (read)", async () => {
@@ -171,7 +170,7 @@ describe("Security — Authentication & Authorization", () => {
         });
     });
 
-    describe("SUPER_ADMIN — unrestricted access", () => {
+    describe("SUPER_ADMIN — restricted from accounting", () => {
         beforeEach(() => {
             mockAuth.mockResolvedValue({ user: { id: "sa-1", role: "SUPER_ADMIN", email: "admin@rescape.fr" } } as never);
         });
@@ -183,11 +182,10 @@ describe("Security — Authentication & Authorization", () => {
             expect(Array.isArray(result)).toBe(true);
         });
 
-        it("should allow SUPER_ADMIN to access all accounting entries", async () => {
+        it("should NOT allow SUPER_ADMIN to access accounting entries", async () => {
             (mockPrisma.accountingEntry.findMany as import("vitest").Mock).mockResolvedValue([]);
             const { getAccountingEntries } = await import("@/actions/accounting");
-            const result = await getAccountingEntries();
-            expect(Array.isArray(result)).toBe(true);
+            await expect(getAccountingEntries()).rejects.toThrow();
         });
     });
 });
@@ -208,7 +206,7 @@ describe("Security — Input Sanitization", () => {
     });
 
     it("should prevent SQL injection via accounting description", async () => {
-        mockAuth.mockResolvedValue({ user: { id: "ben-1", role: "BENEVOLE", email: "bene@rescape.fr" } } as never);
+        mockAuth.mockResolvedValue({ user: { id: "dir-1", role: "DIRECTRICE", email: "vanessa@rescape.fr" } } as never);
         (mockPrisma.accountingEntry.create as import("vitest").Mock).mockResolvedValue({ id: "acc-sql" });
         const { createAccountingEntry } = await import("@/actions/accounting");
         const formData = new FormData();

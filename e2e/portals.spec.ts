@@ -1,17 +1,23 @@
 import { test, expect } from "@playwright/test";
 
-// ─── Admin Dashboard (DIRECTRICE / SUPER_ADMIN) ────────────────────────────────
-async function loginAsDirectrice(page: any) {
+const USERS = {
+    directrice: { email: "delaruevanessa48@gmail.com", password: "Rescape2026!" },
+    tresoriere: { email: "nadia@rescape.fr", password: "Rescape2026!" },
+    benevole: { email: "benevole@rescape.fr", password: "Rescape2026!" },
+    partenaire: { email: "partenaire@test.fr", password: "Rescape2026!" },
+};
+
+async function loginAs(page: any, user: { email: string; password: string }) {
     await page.goto("/admin/login");
-    await page.getByLabel(/email/i).fill("delaruevanessa48@gmail.com");
-    await page.getByLabel(/mot de passe/i).fill("Rescape2026!");
+    await page.getByLabel(/email/i).fill(user.email);
+    await page.getByLabel(/mot de passe/i).fill(user.password);
     await page.getByRole("button", { name: /connexion/i }).click();
     await page.waitForURL(/\/admin\/dashboard/);
 }
 
-test.describe("Admin Dashboard — DIRECTRICE Access", () => {
+test.describe("Admin Dashboard — Direction Access", () => {
     test.beforeEach(async ({ page }) => {
-        await loginAsDirectrice(page);
+        await loginAs(page, USERS.directrice);
     });
 
     test("should display the admin dashboard overview", async ({ page }) => {
@@ -59,90 +65,59 @@ test.describe("Admin Dashboard — DIRECTRICE Access", () => {
     });
 });
 
-// ─── Bénévole Portal ───────────────────────────────────────────────────────────
-test.describe("Portail Bénévole", () => {
+test.describe("Espace Bénévole", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/admin/login");
-        await page.getByLabel(/email/i).fill("benevole@rescape.fr");
-        await page.getByLabel(/mot de passe/i).fill("Rescape2026!");
-        await page.getByRole("button", { name: /connexion/i }).click();
-        await page.waitForURL(/\/portail\/benevole/);
+        await loginAs(page, USERS.benevole);
     });
 
-    test("should show the bénévole portal dashboard", async ({ page }) => {
-        await expect(page.getByText(/bienvenue|bonjour/i)).toBeVisible();
+    test("should show the bénévole dashboard", async ({ page }) => {
+        await expect(page.getByText(/espace bénévole|bienvenue|bonjour/i)).toBeVisible();
     });
 
-    test("should show accounting entry form at /portail/benevole/compta", async ({ page }) => {
-        await page.goto("/portail/benevole/compta");
-        await expect(page.getByRole("combobox", { name: /type/i })).toBeVisible();
-        await expect(page.getByRole("spinbutton", { name: /montant/i })).toBeVisible();
-        await expect(page.getByRole("button", { name: /enregistrer/i })).toBeVisible();
+    test("should show mission list at /admin/dashboard/missions", async ({ page }) => {
+        await page.goto("/admin/dashboard/missions");
+        await expect(page.getByRole("heading", { name: /mes missions/i })).toBeVisible();
     });
 
-    test("should NOT show delete or edit buttons on accounting entries for bénévole", async ({ page }) => {
-        await page.goto("/portail/benevole/compta");
-        // No delete/modify controls visible for BENEVOLE
-        await expect(page.getByRole("button", { name: /supprimer/i })).not.toBeVisible();
-        await expect(page.getByRole("button", { name: /modifier/i })).not.toBeVisible();
+    test("should show calendar at /admin/dashboard/calendrier", async ({ page }) => {
+        await page.goto("/admin/dashboard/calendrier");
+        await expect(page.getByRole("heading", { name: /calendrier des actions/i })).toBeVisible();
     });
 });
 
-// ─── Trésorière Portal ─────────────────────────────────────────────────────────
-test.describe("Portail Trésorière", () => {
+test.describe("Espace Trésorière", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/admin/login");
-        await page.getByLabel(/email/i).fill("nadia@rescape.fr");
-        await page.getByLabel(/mot de passe/i).fill("Rescape2026!");
-        await page.getByRole("button", { name: /connexion/i }).click();
-        await page.waitForURL(/\/portail\/tresoriere/);
+        await loginAs(page, USERS.tresoriere);
     });
 
-    test("should show accounting overview (read only) for trésorière", async ({ page }) => {
-        await expect(page.getByText(/solde|recettes|dépenses/i)).toBeVisible();
+    test("should show accounting overview for trésorière", async ({ page }) => {
+        await page.goto("/admin/dashboard/compta");
+        await expect(page.getByRole("heading", { name: /comptabilité & trésorerie/i })).toBeVisible();
     });
 
     test("should show CSV export button", async ({ page }) => {
+        await page.goto("/admin/dashboard/compta");
         await expect(page.getByRole("button", { name: /exporter|csv/i })).toBeVisible();
-    });
-
-    test("should NOT show new entry form for trésorière", async ({ page }) => {
-        await expect(page.getByRole("button", { name: /ajouter|nouvelle entrée/i })).not.toBeVisible();
     });
 });
 
-// ─── Partenaire Portal ─────────────────────────────────────────────────────────
-test.describe("Portail Partenaire", () => {
+test.describe("Espace Partenaire", () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto("/admin/login");
-        await page.getByLabel(/email/i).fill("partenaire@test.fr");
-        await page.getByLabel(/mot de passe/i).fill("Rescape2026!");
-        await page.getByRole("button", { name: /connexion/i }).click();
-        await page.waitForURL(/\/portail\/partenaire/);
+        await loginAs(page, USERS.partenaire);
     });
 
-    test("should show partner portal dashboard with RDV and Dons sections", async ({ page }) => {
-        await expect(page.getByText(/rendez-vous|prochains rdv/i)).toBeVisible();
+    test("should show partner donations page", async ({ page }) => {
+        await page.goto("/admin/dashboard/mes-dons");
+        await expect(page.getByRole("heading", { name: /mes dons & contributions/i })).toBeVisible();
     });
 
-    test("should show appointment booking form at /portail/partenaire/rdv/new", async ({ page }) => {
-        await page.goto("/portail/partenaire/rdv/new");
-        await expect(page.getByRole("radio", { name: /dépôt/i })).toBeVisible();
-        await expect(page.getByRole("radio", { name: /collecte/i })).toBeVisible();
-        await expect(page.getByLabel(/date/i)).toBeVisible();
+    test("should show partner messaging page", async ({ page }) => {
+        await page.goto("/admin/dashboard/messages-asso");
+        await expect(page.getByRole("heading", { name: /communication avec l'asso/i })).toBeVisible();
     });
 
-    test("should show donation entry form at /portail/partenaire/dons", async ({ page }) => {
-        await page.goto("/portail/partenaire/dons");
-        await expect(page.getByRole("combobox", { name: /type de don/i })).toBeVisible();
-        await expect(page.getByRole("spinbutton", { name: /quantité/i })).toBeVisible();
-    });
-
-    test("should only show own appointments (not other partners)", async ({ page }) => {
-        // When viewing appointments, the list should only show those belonging to current partner
-        await page.goto("/portail/partenaire/rdv");
-        // No data-testid for other partners should be visible
-        // (implementation will filter by partnerId = current user's id)
-        await expect(page.locator('[data-owner="other-partner"]')).toHaveCount(0);
+    test("should block partner from business routes", async ({ page }) => {
+        await page.goto("/admin/dashboard/compta");
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 });

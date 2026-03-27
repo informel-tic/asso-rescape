@@ -4,12 +4,13 @@ import { redirect } from "next/navigation";
 import { ShieldCheck, Star, StarOff, ExternalLink, Globe, Edit2 } from "lucide-react";
 import { togglePartnerHighlight } from "@/app/admin/actions/partner";
 import Link from "next/link";
+import { isDirectionRole } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function PartnersAdminPage() {
     const session = await auth();
-    if (!session || !["SUPER_ADMIN", "DIRECTION"].includes(session.user?.role as string)) {
+    if (!session || !isDirectionRole(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
 

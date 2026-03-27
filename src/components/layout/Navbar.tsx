@@ -50,8 +50,8 @@ const portalNavigation: Record<string, NavItem[]> = {
         { name: "Adhérents", href: "/admin/dashboard/adherents" },
     ],
     PARTENAIRE: [
-        { name: "Rendez-vous", href: "/portail/partenaire" },
-        { name: "Mes Dons", href: "/portail/partenaire/dons" },
+        { name: "Mes Dons", href: "/admin/dashboard/mes-dons" },
+        { name: "Messages", href: "/admin/dashboard/messages-asso" },
     ],
 };
 
@@ -66,7 +66,20 @@ export default function Navbar() {
 
     const isAuthenticated = status === "authenticated" && session?.user;
     const role = (session?.user as { role?: string } | undefined)?.role;
-    const isPortal = isAuthenticated && role;
+
+    // Determine whether this role should be offered a portal link.
+    const hasPortalAccess = (r?: string | null) => {
+        if (!r) return false;
+        if (isSuperAdmin(r)) return true;
+        if (isDirectionRole(r)) return true;
+        if (r === "PARTENAIRE") return true;
+        if (r === "BENEVOLE") return true;
+        // Explicitly exclude 'ADHERENT' from portal access
+        if (r === "ADHERENT") return false;
+        return false;
+    };
+
+    const isPortal = isAuthenticated && hasPortalAccess(role);
 
     // Toujours afficher la navigation publique
     const navigation = publicNavigation;
@@ -78,10 +91,17 @@ export default function Navbar() {
     if (isPortal) {
         if (isSuperAdmin(role)) {
             portalLink = portalNavigation.SUPER_ADMIN[0].href;
+        } else if (role === "TRESORIERE") {
+            portalLink = portalNavigation.TRESORIERE[1].href;
         } else if (isDirectionRole(role)) {
             portalLink = portalNavigation.DIRECTION_GROUP[0].href;
+        } else if (role === "BENEVOLE") {
+            portalLink = portalNavigation.BENEVOLE[0].href;
+        } else if (role === "PARTENAIRE") {
+            portalLink = portalNavigation.PARTENAIRE[0].href;
         } else {
-            portalLink = portalNavigation[role]?.[0]?.href || "/admin/dashboard";
+            const portalNavForRole: NavItem[] | undefined = role ? portalNavigation[role] : undefined;
+            portalLink = portalNavForRole?.[0]?.href || "/";
         }
     }
 

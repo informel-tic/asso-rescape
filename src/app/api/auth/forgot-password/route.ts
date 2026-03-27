@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
 
         const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
 
-        if (user) {
+        // Do not generate tokens or send reset emails for ADHERENT users.
+        if (user && !(user.role && user.role.toUpperCase() === "ADHERENT")) {
             const token = crypto.randomBytes(32).toString("hex");
             const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 heure
 

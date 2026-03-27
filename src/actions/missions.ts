@@ -28,6 +28,15 @@ export async function createMission(formData: FormData) {
         return { error: "Veuillez remplir les champs obligatoires (Titre, Date, Assigné à)." };
     }
 
+    const assignee = await prisma.user.findUnique({
+        where: { id: rawData.assigneeId },
+        select: { role: true }
+    });
+
+    if (!assignee || assignee.role !== "BENEVOLE") {
+        return { error: "Une mission ne peut être assignée qu'à un bénévole." };
+    }
+
     try {
         await prisma.mission.create({
             data: {

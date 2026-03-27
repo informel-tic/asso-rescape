@@ -41,19 +41,19 @@ test.describe("Authentication Flow", () => {
         await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 
-    test("should redirect to /portail/benevole after BENEVOLE login", async ({ page }) => {
+    test("should redirect to /admin/dashboard after BENEVOLE login", async ({ page }) => {
         await loginAs(page, USERS.benevole);
-        await expect(page).toHaveURL(/\/portail\/benevole/);
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 
-    test("should redirect to /portail/tresoriere after TRESORIERE login", async ({ page }) => {
+    test("should redirect to /admin/dashboard after TRESORIERE login", async ({ page }) => {
         await loginAs(page, USERS.nadia);
-        await expect(page).toHaveURL(/\/portail\/tresoriere/);
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 
-    test("should redirect to /portail/partenaire after PARTENAIRE login", async ({ page }) => {
+    test("should redirect to /admin/dashboard after PARTENAIRE login", async ({ page }) => {
         await loginAs(page, USERS.partenaire);
-        await expect(page).toHaveURL(/\/portail\/partenaire/);
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 
     test("should logout and return to homepage", async ({ page }) => {
@@ -70,33 +70,32 @@ test.describe("Route Protection", () => {
         await expect(page).toHaveURL(/\/admin\/login/);
     });
 
-    test("should redirect unauthenticated user when accessing /portail/benevole", async ({ page }) => {
-        await page.goto("/portail/benevole");
+    test("should redirect unauthenticated user when accessing /admin/dashboard/missions", async ({ page }) => {
+        await page.goto("/admin/dashboard/missions");
         await expect(page).toHaveURL(/\/admin\/login/);
     });
 
-    test("should prevent BENEVOLE from accessing /admin/dashboard", async ({ page }) => {
+    test("should prevent BENEVOLE from accessing /admin/dashboard/compta", async ({ page }) => {
         await loginAs(page, USERS.benevole);
-        await page.goto("/admin/dashboard");
-        // Should be redirected away (either 403 or redirect to their portal)
-        await expect(page).not.toHaveURL(/\/admin\/dashboard/);
+        await page.goto("/admin/dashboard/compta");
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 
-    test("should prevent PARTENAIRE from accessing /admin/dashboard", async ({ page }) => {
+    test("should prevent PARTENAIRE from accessing /admin/dashboard/compta", async ({ page }) => {
         await loginAs(page, USERS.partenaire);
-        await page.goto("/admin/dashboard");
-        await expect(page).not.toHaveURL(/\/admin\/dashboard/);
+        await page.goto("/admin/dashboard/compta");
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 
-    test("should prevent TRESORIERE from accessing /admin/users", async ({ page }) => {
+    test("should prevent TRESORIERE from accessing /admin/dashboard/settings", async ({ page }) => {
         await loginAs(page, USERS.nadia);
-        await page.goto("/admin/dashboard/users");
-        await expect(page).not.toHaveURL(/\/admin\/dashboard\/users/);
+        await page.goto("/admin/dashboard/settings");
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 
-    test("should prevent BENEVOLE from accessing /portail/tresoriere", async ({ page }) => {
+    test("should prevent BENEVOLE from accessing /admin/dashboard/compta", async ({ page }) => {
         await loginAs(page, USERS.benevole);
-        await page.goto("/portail/tresoriere");
-        await expect(page).not.toHaveURL(/\/portail\/tresoriere/);
+        await page.goto("/admin/dashboard/compta");
+        await expect(page).toHaveURL(/\/admin\/dashboard/);
     });
 });

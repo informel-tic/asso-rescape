@@ -26,8 +26,8 @@ export default async function MissionsPage() {
     if (isDirection) {
         missions = await getMissionsForDirection();
         const allUsers = await getUsers();
-        // Filtrer pour n'afficher que les utilisateurs assignables (Bénévoles principalement)
-        benevoles = allUsers.filter(u => u.role === "BENEVOLE" || u.role === "PARTENAIRE");
+        // Filtrer pour n'afficher que les utilisateurs assignables (bénévoles uniquement)
+        benevoles = allUsers.filter(u => u.role === "BENEVOLE");
     } else {
         missions = await getMyMissions();
     }

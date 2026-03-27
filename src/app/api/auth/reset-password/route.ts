@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
             },
         });
 
-        if (!user) {
+        // Do not allow resetting password for ADHERENT users
+        if (!user || (user.role && user.role.toUpperCase() === "ADHERENT")) {
             return NextResponse.json({ error: "Token invalide ou expiré" }, { status: 400 });
         }
 

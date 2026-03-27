@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Package, Plus, AlertCircle, Weight, Box } from "lucide-react";
 import DonationDeleteButton from "./DeleteButton";
+import { isDirectionRole } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ const TYPE_LABELS: Record<string, { label: string; emoji: string }> = {
 
 export default async function DonsAdminPage() {
     const session = await auth();
-    if (!session?.user || !["SUPER_ADMIN", "DIRECTION"].includes(session.user?.role as string)) {
+    if (!session?.user || !isDirectionRole(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
 
