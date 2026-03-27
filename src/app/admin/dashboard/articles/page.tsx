@@ -1,12 +1,20 @@
+import { auth } from "@/auth";
+import { isDirectionRole } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 import { Article } from "@prisma/client";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { deleteArticle } from "@/actions/articles";
+import { redirect } from "next/navigation";
 // Use client component for interactive parts if needed, but actions can be invoked via form
 // For delete/toggle, we can use small client components or server actions via forms.
 
 export default async function ArticlesPage() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     const articles = await prisma.article.findMany({
         orderBy: { createdAt: "desc" },
     });

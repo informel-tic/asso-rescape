@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { isPortalRole } from "@/lib/roles";
 
 const ResetSchema = z.object({
     token: z.string().min(1),
@@ -37,8 +38,7 @@ export async function POST(request: NextRequest) {
             },
         });
 
-        // Do not allow resetting password for ADHERENT users
-        if (!user || (user.role && user.role.toUpperCase() === "ADHERENT")) {
+        if (!user || !isPortalRole(user.role)) {
             return NextResponse.json({ error: "Token invalide ou expiré" }, { status: 400 });
         }
 

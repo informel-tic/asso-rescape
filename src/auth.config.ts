@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { isPortalRole } from "@/lib/roles";
 
 export const authConfig = {
     pages: {
@@ -24,8 +25,8 @@ export const authConfig = {
             return session;
         },
         async signIn({ user }) {
-            // Explicitly block ADHERENT users from signing in via any provider
-            if (user && (user as any).role && (user as any).role.toUpperCase() === "ADHERENT") {
+            // Block accounts that are not meant to access the portal.
+            if (user && !isPortalRole((user as any).role)) {
                 return false;
             }
             return true;

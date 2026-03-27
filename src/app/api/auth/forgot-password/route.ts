@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendMail } from "@/lib/mailer";
 import crypto from "crypto";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { isPortalRole } from "@/lib/roles";
 
 /**
  * POST /api/auth/forgot-password
@@ -25,8 +26,7 @@ export async function POST(request: NextRequest) {
 
         const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
 
-        // Do not generate tokens or send reset emails for ADHERENT users.
-        if (user && !(user.role && user.role.toUpperCase() === "ADHERENT")) {
+        if (user && isPortalRole(user.role)) {
             const token = crypto.randomBytes(32).toString("hex");
             const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 heure
 

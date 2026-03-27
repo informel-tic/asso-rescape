@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { hasAdminAccess } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -21,7 +22,9 @@ export async function getHighlightedPartners() {
 
 export async function createPartner(formData: FormData) {
     const session = await auth();
-    if (!session?.user) throw new Error("Non autorisé");
+    if (!session?.user || !hasAdminAccess(session.user.role as string)) {
+        throw new Error("Non autorisé");
+    }
 
     const rawData = {
         name: formData.get("name"),
@@ -50,7 +53,9 @@ export async function createPartner(formData: FormData) {
 
 export async function deletePartner(id: string) {
     const session = await auth();
-    if (!session?.user) throw new Error("Non autorisé");
+    if (!session?.user || !hasAdminAccess(session.user.role as string)) {
+        throw new Error("Non autorisé");
+    }
 
     try {
         await prisma.partner.delete({ where: { id } });
@@ -63,10 +68,7 @@ export async function deletePartner(id: string) {
 
 export async function updatePartner(formData: FormData) {
     const session = await auth();
-    if (!session?.user) throw new Error("Non autorisé");
-
-    const role = session.user.role as string;
-    if (!["SUPER_ADMIN", "DIRECTION", "DIRECTRICE"].includes(role)) {
+    if (!session?.user || !hasAdminAccess(session.user.role as string)) {
         throw new Error("Action non autorisée");
     }
 

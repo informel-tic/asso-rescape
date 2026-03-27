@@ -22,21 +22,18 @@ export async function createMembership(formData: FormData) {
         const email = formData.get("email") as string;
 
         if (!name || !email) throw new Error("Nom et Email requis pour un nouvel adhérent.");
-        // Generate a strong random password and store its hash. ADHERENT users
-        // are not allowed to authenticate; this prevents a predictable default.
+        // Generate a strong random password, but keep the account without portal access.
         const randomPwd = crypto.randomBytes(32).toString('hex');
         const hash = await bcrypt.hash(randomPwd, 10);
 
         let user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
-            // Adhérents: use a dedicated role 'ADHERENT' so they are
-            // clearly identified but treated as having NO portal access.
             user = await prisma.user.create({
                 data: {
                     name,
                     email,
                     password: hash,
-                    role: "ADHERENT"
+                    role: ""
                 }
             });
         }

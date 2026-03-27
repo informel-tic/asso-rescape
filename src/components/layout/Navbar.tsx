@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { isDirectionRole, isSuperAdmin } from "@/lib/roles";
+import { isDirectionRole, isSuperAdmin, isPortalRole } from "@/lib/roles";
 import { Menu, X } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -69,14 +69,7 @@ export default function Navbar() {
 
     // Determine whether this role should be offered a portal link.
     const hasPortalAccess = (r?: string | null) => {
-        if (!r) return false;
-        if (isSuperAdmin(r)) return true;
-        if (isDirectionRole(r)) return true;
-        if (r === "PARTENAIRE") return true;
-        if (r === "BENEVOLE") return true;
-        // Explicitly exclude 'ADHERENT' from portal access
-        if (r === "ADHERENT") return false;
-        return false;
+        return isPortalRole(r);
     };
 
     const isPortal = isAuthenticated && hasPortalAccess(role);

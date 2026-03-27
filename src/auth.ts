@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
+import { isPortalRole } from "@/lib/roles";
 
 const loginSchema = z.object({
     email: z.string().email(),
@@ -26,9 +27,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     where: { email: normalizedEmail },
                 });
 
-                // No user or ADHERENT users cannot sign in
+                // Only portal-enabled roles can sign in.
                 if (!user) return null;
-                if (user.role && user.role.toUpperCase() === "ADHERENT") return null;
+                if (!isPortalRole(user.role)) return null;
 
                 const passwordsMatch = await bcrypt.compare(password, user.password);
 

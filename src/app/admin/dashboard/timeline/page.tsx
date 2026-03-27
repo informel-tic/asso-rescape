@@ -1,10 +1,18 @@
+import { auth } from "@/auth";
+import { isDirectionRole } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Clock, Plus, MoreHorizontal } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function TimelineAdminPage() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     const events = await prisma.timelineEntry.findMany({
         orderBy: { order: "asc" },
     });

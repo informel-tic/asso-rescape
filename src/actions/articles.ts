@@ -65,7 +65,7 @@ export async function createArticle(formData: FormData) {
     }
 
     revalidatePath("/admin/dashboard/articles");
-    revalidatePath("/blog"); // Public blog page
+    revalidatePath("/actualites");
     redirect("/admin/dashboard/articles");
 }
 
@@ -81,7 +81,7 @@ export async function deleteArticle(id: string) {
     try {
         await prisma.article.delete({ where: { id } });
         revalidatePath("/admin/dashboard/articles");
-        revalidatePath("/blog");
+        revalidatePath("/actualites");
     } catch (error) {
         console.error("Delete error:", error);
         return { error: "Erreur lors de la suppression" };
@@ -106,7 +106,7 @@ export async function toggleArticleStatus(id: string, currentStatus: boolean) {
             },
         });
         revalidatePath("/admin/dashboard/articles");
-        revalidatePath("/blog");
+        revalidatePath("/actualites");
     } catch (error) {
         console.error("Update error:", error);
         return { error: "Erreur lors de la mise à jour" };
@@ -156,7 +156,7 @@ export async function updateArticle(id: string, formData: FormData) {
     }
 
     revalidatePath("/admin/dashboard/articles");
-    revalidatePath("/blog");
+    revalidatePath("/actualites");
     redirect("/admin/dashboard/articles");
 }
 

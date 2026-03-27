@@ -1,10 +1,18 @@
+import { auth } from "@/auth";
+import { isDirectionRole } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 import { Event } from "@prisma/client";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { deleteEvent } from "@/actions/events";
+import { redirect } from "next/navigation";
 
 export default async function EventsPage() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     const events = await prisma.event.findMany({
         orderBy: { start: "asc" },
     });
