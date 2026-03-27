@@ -10,7 +10,7 @@ import {
     MessageSquare, Calculator, Settings, Activity,
     Clock, ShieldCheck, Package, CreditCard, LogOut, Briefcase
 } from "lucide-react";
-import { isDirectionRole, isSuperAdmin } from "@/lib/roles";
+import { isDirectionRole, isSuperAdmin, isTresorier } from "@/lib/roles";
 
 interface AdminMobileNavProps {
     role: string;
@@ -25,8 +25,11 @@ export function AdminMobileNav({ role, label, userName }: AdminMobileNavProps) {
     const hasAccess = (allowedRoles: string[]) => {
         const currentRoles = [role];
 
-        if (isDirectionRole(role)) {
+        if (isDirectionRole(role) && !isTresorier(role)) {
             currentRoles.push("DIRECTION");
+        }
+        if (isTresorier(role)) {
+            currentRoles.push("TRESORIERE");
         }
         if (isSuperAdmin(role)) {
             currentRoles.push("SUPER_ADMIN");
@@ -161,6 +164,31 @@ export function AdminMobileNav({ role, label, userName }: AdminMobileNavProps) {
                             </div>
                         )}
 
+                        {/* Espace Trésorier — Finances & Adhérents */}
+                        {hasAccess(["TRESORIERE"]) && (
+                            <div>
+                                <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Finances & Comptabilité</p>
+                                <nav className="space-y-1.5">
+                                    <Link onClick={() => setIsOpen(false)} href="/admin/dashboard/compta" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold transition-all group">
+                                        <div className="p-1.5 bg-slate-100 rounded-md text-slate-400 group-hover:bg-slate-200 transition-colors"><Calculator className="w-4 h-4" /></div>
+                                        <span className="text-sm">Finances & Comptabilité</span>
+                                    </Link>
+                                    <Link onClick={() => setIsOpen(false)} href="/admin/dashboard/adherents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold transition-all group">
+                                        <div className="p-1.5 bg-slate-100 rounded-md text-slate-400 group-hover:bg-slate-200 transition-colors"><CreditCard className="w-4 h-4" /></div>
+                                        <span className="text-sm">Adhérents & Cotisations</span>
+                                    </Link>
+                                    <Link onClick={() => setIsOpen(false)} href="/admin/dashboard/dons" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold transition-all group">
+                                        <div className="p-1.5 bg-slate-100 rounded-md text-slate-400 group-hover:bg-slate-200 transition-colors"><Package className="w-4 h-4" /></div>
+                                        <span className="text-sm">Dons Physiques</span>
+                                    </Link>
+                                    <Link onClick={() => setIsOpen(false)} href="/admin/dashboard/calendrier-global" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold transition-all group">
+                                        <div className="p-1.5 bg-slate-100 rounded-md text-slate-400 group-hover:bg-slate-200 transition-colors"><Calendar className="w-4 h-4" /></div>
+                                        <span className="text-sm">Méga-Calendrier</span>
+                                    </Link>
+                                </nav>
+                            </div>
+                        )}
+
                         {/* Partenaire Espace */}
                         {hasAccess(["PARTENAIRE"]) && (
                             <div>
@@ -175,7 +203,7 @@ export function AdminMobileNav({ role, label, userName }: AdminMobileNavProps) {
                         )}
 
                         {/* Bénévoles Espace */}
-                        {hasAccess(["BENEVOLE"]) && (
+                        {hasAccess(["BENEVOLE", "TRESORIERE"]) && (
                             <div>
                                 <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Espace Bénévole</p>
                                 <nav className="space-y-1.5">

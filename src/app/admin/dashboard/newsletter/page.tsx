@@ -3,8 +3,16 @@ import { Newsletter } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
 import { Mail, UserMinus, Download } from "lucide-react";
 import { unsubscribeNewsletter } from "@/actions/newsletter";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { isDirectionRole } from "@/lib/roles";
 
 export default async function NewsletterAdminPage() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     const subscribers: Newsletter[] = await prisma.newsletter.findMany({
         orderBy: { createdAt: "desc" },
     });

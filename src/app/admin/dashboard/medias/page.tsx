@@ -1,8 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/Button";
 import { Image as ImageIcon, Trash2, Plus, ExternalLink } from "lucide-react";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { isDirectionRole } from "@/lib/roles";
 
 export default async function MediaManagerPage() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     // Dans une version réelle, on listerait les fichiers sur S3 ou un dossier public.
     // Ici, on extrait les images utilisées dans les Articles et Événements pour donner une vue d'ensemble.
     const articles = await prisma.article.findMany({ select: { image: true, title: true } });

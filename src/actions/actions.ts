@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { auth } from "@/auth";
+import { hasAdminAccess } from "@/lib/roles";
 
 const ActionSchema = z.object({
     title: z.string().min(3),
@@ -25,6 +27,11 @@ export async function getActiveActions() {
 }
 
 export async function createAction(formData: FormData) {
+    const session = await auth();
+    if (!session?.user || !hasAdminAccess(session.user.role as string)) {
+        return { error: "Non autorisé" };
+    }
+
     const rawData = {
         title: formData.get("title"),
         description: formData.get("description"),
@@ -56,6 +63,11 @@ export async function createAction(formData: FormData) {
 }
 
 export async function updateAction(id: string, formData: FormData) {
+    const session = await auth();
+    if (!session?.user || !hasAdminAccess(session.user.role as string)) {
+        return { error: "Non autorisé" };
+    }
+
     const rawData = {
         title: formData.get("title"),
         description: formData.get("description"),
@@ -83,6 +95,11 @@ export async function updateAction(id: string, formData: FormData) {
 }
 
 export async function deleteAction(id: string) {
+    const session = await auth();
+    if (!session?.user || !hasAdminAccess(session.user.role as string)) {
+        return { error: "Non autorisé" };
+    }
+
     try {
         await prisma.action.delete({ where: { id } });
         revalidatePath("/actions");

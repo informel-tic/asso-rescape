@@ -3,7 +3,7 @@ import { authConfig } from "./auth.config";
 
 const { auth } = NextAuth(authConfig);
 
-import { isDirectionRole, isSuperAdmin } from "@/lib/roles";
+import { isDirectionRole, isSuperAdmin, isTresorier } from "@/lib/roles";
 
 const DEFAULT_REDIRECT = "/admin/dashboard";
 
@@ -24,6 +24,22 @@ export default auth((req) => {
         // Ils conservent cependant l'accès aux Utilisateurs (/admin/dashboard/users)
         const techRoutes = ["/admin/dashboard/settings"];
         if (isDirectionRole(role) && techRoutes.some(r => path.startsWith(r))) {
+            return Response.redirect(new URL("/admin/dashboard", req.nextUrl));
+        }
+
+        // La TRESORIERE : uniquement compta, adhérents, dons + fonctions bénévole
+        const tresorierRoutes = [
+            "/admin/dashboard",
+            "/admin/dashboard/compta",
+            "/admin/dashboard/adherents",
+            "/admin/dashboard/dons",
+            "/admin/dashboard/calendrier-global",
+            "/admin/dashboard/missions",
+            "/admin/dashboard/calendrier",
+            "/admin/dashboard/messagerie",
+            "/admin/dashboard/profil",
+        ];
+        if (isTresorier(role) && !tresorierRoutes.some(r => path === r || path.startsWith(`${r}/`))) {
             return Response.redirect(new URL("/admin/dashboard", req.nextUrl));
         }
 

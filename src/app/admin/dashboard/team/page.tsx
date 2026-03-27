@@ -1,10 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Users, Plus, MoreHorizontal, Briefcase } from "lucide-react";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { isDirectionRole } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function TeamAdminPage() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     const members = await prisma.teamMember.findMany({
         orderBy: { order: "asc" },
     });

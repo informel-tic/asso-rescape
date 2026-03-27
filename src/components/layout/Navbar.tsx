@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { isDirectionRole, isSuperAdmin, isPortalRole } from "@/lib/roles";
+import { isDirectionRole, isSuperAdmin, isPortalRole, isTresorier } from "@/lib/roles";
 import { Menu, X } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -46,8 +46,8 @@ const portalNavigation: Record<string, NavItem[]> = {
     TRESORIERE: [
         { name: "Dashboard", href: "/admin/dashboard" },
         { name: "Compta", href: "/admin/dashboard/compta" },
-        { name: "Utilisateurs", href: "/admin/dashboard/users" },
         { name: "Adhérents", href: "/admin/dashboard/adherents" },
+        { name: "Mes Missions", href: "/admin/dashboard/missions" },
     ],
     PARTENAIRE: [
         { name: "Mes Dons", href: "/admin/dashboard/mes-dons" },
@@ -84,8 +84,8 @@ export default function Navbar() {
     if (isPortal) {
         if (isSuperAdmin(role)) {
             portalLink = portalNavigation.SUPER_ADMIN[0].href;
-        } else if (role === "TRESORIERE") {
-            portalLink = portalNavigation.TRESORIERE[1].href;
+        } else if (isTresorier(role)) {
+            portalLink = "/admin/dashboard/compta";
         } else if (isDirectionRole(role)) {
             portalLink = portalNavigation.DIRECTION_GROUP[0].href;
         } else if (role === "BENEVOLE") {

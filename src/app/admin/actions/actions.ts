@@ -3,10 +3,11 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { hasAdminAccess } from "@/lib/roles";
 
 async function checkDirectionAuth() {
     const session = await auth();
-    if (!session?.user || !["SUPER_ADMIN", "DIRECTION"].includes(session.user.role as string)) {
+    if (!session?.user || !hasAdminAccess(session.user.role as string)) {
         throw new Error("Unauthorized");
     }
     return session;

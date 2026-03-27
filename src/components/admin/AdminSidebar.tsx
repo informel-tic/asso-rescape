@@ -7,7 +7,7 @@ import {
     Clock, ShieldCheck, Package, CreditCard, Briefcase, Lock
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { isDirectionRole, isSuperAdmin } from "@/lib/roles";
+import { isDirectionRole, isSuperAdmin, isTresorier } from "@/lib/roles";
 import { LogoutSidebarButton } from "@/components/admin/LogoutSidebarButton";
 
 interface AdminSidebarProps {
@@ -22,10 +22,12 @@ export function AdminSidebar({ role, label, userName }: AdminSidebarProps) {
     const hasAccess = (allowedRoles: string[]) => {
         const currentRoles = [role];
 
-        if (isDirectionRole(role)) {
+        if (isDirectionRole(role) && !isTresorier(role)) {
             currentRoles.push("DIRECTION");
         }
-
+        if (isTresorier(role)) {
+            currentRoles.push("TRESORIERE");
+        }
         if (isSuperAdmin(role)) {
             currentRoles.push("SUPER_ADMIN");
         }
@@ -142,6 +144,39 @@ export function AdminSidebar({ role, label, userName }: AdminSidebarProps) {
                         </div>
                     )}
 
+                    {/* Espace Trésorier — Finances & Adhérents (+ vue Bénévole) */}
+                    {hasAccess(["TRESORIERE"]) && (
+                        <div>
+                            <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Finances & Comptabilité</p>
+                            <nav className="space-y-1.5">
+                                <Link href="/admin/dashboard/compta" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all group ${pathname.startsWith("/admin/dashboard/compta") ? "bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50" : "text-slate-600 hover:bg-slate-50"}`}>
+                                    <div className={`p-1.5 rounded-md transition-colors ${pathname.startsWith("/admin/dashboard/compta") ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>
+                                        <Calculator className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm">Finances & Comptabilité</span>
+                                </Link>
+                                <Link href="/admin/dashboard/adherents" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all group ${pathname.startsWith("/admin/dashboard/adherents") ? "bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50" : "text-slate-600 hover:bg-slate-50"}`}>
+                                    <div className={`p-1.5 rounded-md transition-colors ${pathname.startsWith("/admin/dashboard/adherents") ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>
+                                        <CreditCard className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm">Adhérents & Cotisations</span>
+                                </Link>
+                                <Link href="/admin/dashboard/dons" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all group ${pathname.startsWith("/admin/dashboard/dons") ? "bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50" : "text-slate-600 hover:bg-slate-50"}`}>
+                                    <div className={`p-1.5 rounded-md transition-colors ${pathname.startsWith("/admin/dashboard/dons") ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>
+                                        <Package className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm">Dons Physiques</span>
+                                </Link>
+                                <Link href="/admin/dashboard/calendrier-global" className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold transition-all group ${pathname.startsWith("/admin/dashboard/calendrier-global") ? "bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50" : "text-slate-600 hover:bg-slate-50"}`}>
+                                    <div className={`p-1.5 rounded-md transition-colors ${pathname.startsWith("/admin/dashboard/calendrier-global") ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>
+                                        <Calendar className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm">Méga-Calendrier</span>
+                                </Link>
+                            </nav>
+                        </div>
+                    )}
+
                     {/* Partenaire Espace */}
                     {hasAccess(["PARTENAIRE"]) && (
                         <div>
@@ -158,7 +193,7 @@ export function AdminSidebar({ role, label, userName }: AdminSidebarProps) {
                     )}
 
                     {/* Bénévoles Espace */}
-                    {hasAccess(["BENEVOLE"]) && (
+                    {hasAccess(["BENEVOLE", "TRESORIERE"]) && (
                         <div>
                             <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Espace Bénévole</p>
                             <nav className="space-y-1.5">

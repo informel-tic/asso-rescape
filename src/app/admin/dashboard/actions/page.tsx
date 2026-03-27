@@ -5,12 +5,13 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { toggleActionStatus } from "@/app/admin/actions/actions";
 import DeleteActionTrigger from "./DeleteActionTrigger";
+import { hasAdminAccess } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function ActionsAdminPage() {
     const session = await auth();
-    if (!session?.user || !["SUPER_ADMIN", "DIRECTION"].includes(session.user?.role as string)) {
+    if (!session?.user || !hasAdminAccess(session.user?.role as string)) {
         redirect("/admin/dashboard");
     }
 

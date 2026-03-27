@@ -11,12 +11,12 @@ Copiez `.env.example` vers `.env` sur votre serveur et renseignez les valeurs su
 ## 2. Migration de la Base de Données
 ### Passage de SQLite à PostgreSQL
 1. Assurez-vous d'avoir une instance PostgreSQL vide.
-2. Dans `.env`, passez `DB_PROVIDER=postgresql`.
+2. Dans les variables d'environnement Vercel, définissez `DATABASE_URL` avec l'URL PostgreSQL Supabase.
 3. Lancez la synchronisation :
    ```bash
    npx prisma db push
    ```
-   *Note : Les données existantes dans dev.db ne sont pas migrées automatiquement. Un export/import JSON ou SQL est nécessaire si vous souhaitez conserver les tests.*
+   *Note : Les données locales de prisma/dev.db (SQLite) ne migrent pas automatiquement. Un export/import JSON est nécessaire si besoin.*
 
 ## 3. Build & Lancement
 L'application est optimisée pour Next.js (déploiement idéal sur Vercel ou via Docker).

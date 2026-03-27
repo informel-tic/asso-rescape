@@ -4,3 +4,5 @@ BENEVOLE|benevole@rescape.fr|UNKNOWN
 SUPER_ADMIN|rchon@rchon-dev.fr|UNKNOWN
 DIRECTION|nicolas@rescape.fr|Rescape2026!
 DIRECTION|direction@rescape.fr|Rescape2026!
+TRESORIERE|tresoriere@rescape.fr|Rescape2026!
+TRESORIER|tresorier@rescape.fr|Rescape2026!

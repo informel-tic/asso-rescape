@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/set-provider.js postgresql && prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -14,6 +14,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:update-snapshots": "playwright test --update-snapshots",
     "test:all": "npm run test && npm run test:e2e",
+    "db:generate": "prisma generate",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "db:push": "prisma db push",
     "postinstall": "prisma generate"
   },
   "prisma": {

@@ -1,10 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { Message } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { isDirectionRole } from "@/lib/roles";
 
 // Inline delete action for simplicity
 async function deleteMessage(id: string) {
     "use server";
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        throw new Error("Unauthorized");
+    }
     try {
         await prisma.message.delete({ where: { id } });
         revalidatePath("/admin/dashboard/messages");
@@ -14,6 +21,11 @@ async function deleteMessage(id: string) {
 }
 
 export default async function MessagesPage() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     const messages = await prisma.message.findMany({
         orderBy: { createdAt: "desc" },
     });

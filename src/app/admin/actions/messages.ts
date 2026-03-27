@@ -22,12 +22,19 @@ export async function sendInternalMessage(formData: FormData) {
     const fromUserId = session.user!.id as string;
     if (!fromUserId) throw new Error("Erreur de session : ID expéditeur manquant.");
 
+    if (toUserId === fromUserId) throw new Error("Vous ne pouvez pas vous envoyer un message.");
+    if (subject.length > 200) throw new Error("L'objet ne peut pas dépasser 200 caractères.");
+    if (content.length > 5000) throw new Error("Le message ne peut pas dépasser 5000 caractères.");
+
+    const safeSubject = subject.replace(/<[^>]*>/g, "").trim();
+    const safeContent = content.replace(/<[^>]*>/g, "").trim();
+
     await prisma.internalMessage.create({
         data: {
             fromUserId,
             toUserId,
-            subject,
-            content,
+            subject: safeSubject,
+            content: safeContent,
         }
     });
 

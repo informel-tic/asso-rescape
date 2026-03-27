@@ -2,14 +2,14 @@ import { auth } from "@/auth";
 import { getUsers } from "@/actions/users";
 import { redirect } from "next/navigation";
 import { UserList } from "@/components/admin/UserList";
+import { canManageUsers } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
     const session = await auth();
-    const allowedRoles = ["SUPER_ADMIN", "DIRECTION", "DIRECTRICE", "TRESORIERE"];
 
-    if (!session?.user || typeof session.user.role !== "string" || !allowedRoles.includes(session.user.role)) {
+    if (!session?.user || !canManageUsers(session.user.role as string)) {
         redirect("/admin/dashboard");
     }
 

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { isDirectionRole, isSuperAdmin } from "@/lib/roles";
+import { hasAdminAccess } from "@/lib/roles";
 import { unstable_noStore as noStore } from "next/cache";
 
 export interface CalendarEvent {
@@ -29,7 +29,7 @@ export async function getGlobalCalendarEvents(): Promise<CalendarEvent[]> {
         throw new Error("Action non autorisée");
     }
     const role = session.user.role as string;
-    const isAllowed = isSuperAdmin(role) || isDirectionRole(role) || role === "TRESORIERE";
+    const isAllowed = hasAdminAccess(role);
 
     if (!session?.user || !role || !isAllowed) {
         throw new Error("Action non autorisée");

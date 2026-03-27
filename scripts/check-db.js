@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, '..', 'dev.db');
+const dbPath = path.join(__dirname, '..', 'prisma', 'dev.db');
 if (!fs.existsSync(dbPath)) {
     console.error("Database not found at " + dbPath);
     process.exit(1);

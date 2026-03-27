@@ -1,10 +1,14 @@
-import { PrismaClient } from '@prisma/client';
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import Database from 'better-sqlite3';
+const Database = require('better-sqlite3');
 
-const db = new Database('./dev.db');
-const adapter = new PrismaBetterSqlite3(db);
-const prisma = new PrismaClient({ adapter });
+const db = new Database('./prisma/dev.db');
 
-console.log('Keys in prisma:', Object.keys(prisma).filter(k => !k.startsWith('_')));
-console.log('Does mission exist?', 'mission' in prisma);
+const tables = ['User', 'Stat', 'Action', 'TimelineEntry', 'TeamMember', 'SocialLink'];
+for (const table of tables) {
+	const row = db.prepare('SELECT COUNT(*) AS count FROM ' + table).get();
+	console.log(table + ': ' + row.count);
+}
+
+const users = db.prepare('SELECT email, role FROM User ORDER BY email').all();
+console.log('USERS', users);
+
+db.close();

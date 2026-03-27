@@ -93,7 +93,11 @@ export async function sendContactNotification(opts: {
     subject?: string;
     content: string;
 }): Promise<void> {
-    const adminEmail = process.env.ADMIN_EMAIL ?? "delaruevanessa48@gmail.com";
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+        console.warn("[mailer] ADMIN_EMAIL non configuré — la notification de contact n'a pas pu être envoyée");
+        return;
+    }
     const safeName = escapeHtml(opts.name);
     const safeEmail = escapeHtml(opts.email);
     const safePhone = escapeHtml(opts.phone ?? "—");

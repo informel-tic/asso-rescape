@@ -3,8 +3,9 @@ generator client {
 }
 
 // Prisma v7 : l'URL du datasource est définie dans prisma.config.ts
+// Local = sqlite | Prod = postgresql (modifié par scripts/set-provider.js avant build Vercel)
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 
@@ -40,6 +41,8 @@ model Article {
   publishedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([published, createdAt])
 }
 
 model Event {
@@ -53,6 +56,8 @@ model Event {
   status      String   @default("PUBLISHED") // DRAFT, PUBLISHED, CANCELLED
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([status, start])
 }
 
 
@@ -63,7 +68,7 @@ model Partner {
   logo          String?
   isHighlighted Boolean  @default(false)
   userId        String?  @unique
-  user          User?    @relation(fields: [userId], references: [id])
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -110,6 +115,9 @@ model Appointment {
   status    String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
 }
 
 model Donation {
@@ -124,6 +132,9 @@ model Donation {
   notes        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
 }
 
 model AccountingEntry {
@@ -185,9 +196,9 @@ model Membership {
 model InternalMessage {
   id          String   @id @default(cuid())
   fromUserId  String
-  from        User     @relation("SentMessages", fields: [fromUserId], references: [id])
+  from        User     @relation("SentMessages", fields: [fromUserId], references: [id], onDelete: Cascade)
   toUserId    String
-  to          User     @relation("ReceivedMessages", fields: [toUserId], references: [id])
+  to          User     @relation("ReceivedMessages", fields: [toUserId], references: [id], onDelete: Cascade)
   subject     String
   content     String
   isRead      Boolean  @default(false)
@@ -204,8 +215,6 @@ model Newsletter {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([email])
 }
 
 model Mission {

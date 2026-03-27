@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { isDirectionRole, isSuperAdmin } from "@/lib/roles";
+import { canManageUsers, isSuperAdmin, isValidRole } from "@/lib/roles";
 
 export async function getUsers() {
     const session = await auth();
@@ -12,9 +12,8 @@ export async function getUsers() {
         throw new Error("Action non autorisée");
     }
     const role = session.user.role as string;
-    const isAllowed = isSuperAdmin(role) || isDirectionRole(role) || role === "TRESORIERE";
 
-    if (!isAllowed) {
+    if (!canManageUsers(role)) {
         throw new Error("Action non autorisée");
     }
 
@@ -30,14 +29,17 @@ export async function createUser(data: { name: string; email: string; role: stri
         throw new Error("Action non autorisée");
     }
     const role = session.user.role as string;
-    const isAllowed = isSuperAdmin(role) || isDirectionRole(role) || role === "TRESORIERE";
 
-    if (!isAllowed) {
+    if (!canManageUsers(role)) {
         throw new Error("Action non autorisée");
     }
 
     if (data.role === "SUPER_ADMIN" && session.user.role !== "SUPER_ADMIN") {
         throw new Error("Seul un administrateur système peut créer un compte de type Super Admin");
+    }
+
+    if (!isValidRole(data.role)) {
+        throw new Error("Rôle invalide");
     }
 
     if (!data.password || data.password.length < 8) {
@@ -75,9 +77,8 @@ export async function deleteUser(userId: string) {
         throw new Error("Action non autorisée");
     }
     const role = session.user.role as string;
-    const isAllowed = isSuperAdmin(role) || isDirectionRole(role) || role === "TRESORIERE";
 
-    if (!isAllowed) {
+    if (!canManageUsers(role)) {
         throw new Error("Action non autorisée");
     }
 
@@ -113,9 +114,8 @@ export async function updateUser(userId: string, data: { name?: string; email?: 
         throw new Error("Action non autorisée");
     }
     const role = session.user.role as string;
-    const isAllowed = isSuperAdmin(role) || isDirectionRole(role) || role === "TRESORIERE";
 
-    if (!isAllowed) {
+    if (!canManageUsers(role)) {
         throw new Error("Action non autorisée");
     }
 
@@ -128,6 +128,10 @@ export async function updateUser(userId: string, data: { name?: string; email?: 
 
     if (data.role === "SUPER_ADMIN" && session.user.role !== "SUPER_ADMIN") {
         throw new Error("Seul un administrateur système peut élever un utilisateur au rang de Super Admin");
+    }
+
+    if (data.role && !isValidRole(data.role)) {
+        throw new Error("Rôle invalide");
     }
 
     const updateData: Record<string, string | null | undefined> = {

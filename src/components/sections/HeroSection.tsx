@@ -58,8 +58,9 @@ export default function HeroSection() {
                             }}
                             className="text-xl text-textLight font-lato max-w-lg mx-auto lg:mx-0 leading-relaxed"
                         >
-                            Lutte Anti Gaspillage Solidaire à Aniche (59580).
-                            Rejoignez une aventure humaine où chaque geste compte.
+                            <span>Lutte Anti Gaspillage Solidaire à Aniche (59580).</span><br />
+                            <span>Rejoignez <span className="font-bold text-primary">une aventure humaine</span> où chaque geste compte.</span>
+                            
                         </motion.p>
 
                         <motion.div

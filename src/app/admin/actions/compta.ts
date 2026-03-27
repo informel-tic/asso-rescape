@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { isDirectionRole } from "@/lib/roles";
+import { accountingEntrySchema } from "@/lib/validations/accounting";
 
 export async function createAccountingEntry(formData: FormData) {
     const session = await auth();
@@ -14,23 +15,26 @@ export async function createAccountingEntry(formData: FormData) {
     const userId = session.user.id as string;
     if (!userId) throw new Error("Erreur de session : ID utilisateur manquant.");
 
-    const type = formData.get("type") as string;
-    const amount = parseFloat(formData.get("amount") as string);
-    const category = formData.get("category") as string;
-    const description = formData.get("description") as string;
-    const dateStr = formData.get("date") as string;
+    const rawData = {
+        type: formData.get("type"),
+        amount: parseFloat(formData.get("amount") as string),
+        category: formData.get("category"),
+        description: formData.get("description"),
+        date: formData.get("date"),
+    };
 
-    if (!type || !amount || !category || !description || !dateStr) {
-        throw new Error("Champs requis manquants");
+    const validated = accountingEntrySchema.safeParse(rawData);
+    if (!validated.success) {
+        throw new Error("Données invalides : vérifiez les champs");
     }
 
     await prisma.accountingEntry.create({
         data: {
-            type,
-            amount,
-            category,
-            description,
-            date: new Date(dateStr),
+            type: validated.data.type,
+            amount: validated.data.amount,
+            category: validated.data.category,
+            description: validated.data.description,
+            date: new Date(validated.data.date),
             createdById: userId
         }
     });

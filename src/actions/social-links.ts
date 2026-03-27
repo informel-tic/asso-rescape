@@ -3,10 +3,11 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { isSuperAdmin } from "@/lib/roles";
 
 async function requireSuperAdmin() {
     const session = await auth();
-    if (!session?.user || session.user.role !== "SUPER_ADMIN") {
+    if (!session?.user || !isSuperAdmin(session.user.role as string)) {
         throw new Error("Accès refusé : SUPER_ADMIN requis");
     }
     return session;

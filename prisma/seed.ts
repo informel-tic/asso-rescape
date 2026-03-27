@@ -1,16 +1,25 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-
-const dbUrl = process.env.DATABASE_URL || "postgres://dummy";
-const pool = new Pool({ connectionString: dbUrl });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 import bcrypt from 'bcryptjs';
 
+const dbUrl = process.env.DATABASE_URL || 'file:./prisma/dev.db';
+const isSqlite = dbUrl.startsWith('file:');
+
+async function createPrismaClient(): Promise<PrismaClient> {
+    if (isSqlite) {
+        const { PrismaBetterSqlite3 } = await import('@prisma/adapter-better-sqlite3');
+        return new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: dbUrl }) });
+    } else {
+        const { Pool } = await import('pg');
+        const { PrismaPg } = await import('@prisma/adapter-pg');
+        const pool = new Pool({ connectionString: dbUrl });
+        return new PrismaClient({ adapter: new PrismaPg(pool) });
+    }
+}
+
 async function main() {
-    console.log('🌱 Starting seed...');
+    const prisma = await createPrismaClient();
+    console.log(`🌱 Starting seed... (${isSqlite ? 'SQLite' : 'PostgreSQL'})`);
 
     // 1. Create Users (Roles: SUPER_ADMIN, DIRECTRICE, TRESORIERE, BENEVOLE, PARTENAIRE)
     const passwordHash = await bcrypt.hash('Rescape2026!', 10);
@@ -20,6 +29,7 @@ async function main() {
         { email: 'vanessa@rescape.fr', name: 'Vanessa Delarue', role: 'DIRECTRICE' },
         { email: 'nicolas@rescape.fr', name: 'Nicolas Delarue', role: 'DIRECTEUR ADJOINT' },
         { email: 'tresoriere@rescape.fr', name: 'Nadia Bennaceur', role: 'TRESORIERE' },
+        { email: 'tresorier@rescape.fr', name: 'Trésorier Exemple', role: 'TRESORIER' },
         { email: 'benevole@rescape.fr', name: 'Bénévole Exemple', role: 'BENEVOLE' },
         { email: 'partenaire@rescape.fr', name: 'Carrefour Partenaire', role: 'PARTENAIRE', organizationName: 'Carrefour Aniche' },
     ];
@@ -143,13 +153,12 @@ async function main() {
         }
     }
     console.log('✅ Social links seeded');
+
+    await prisma.$disconnect();
 }
 
 main()
     .catch((e) => {
         console.error(e);
         process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
     });

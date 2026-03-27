@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { z } from "zod";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { isPortalRole } from "@/lib/roles";
@@ -30,10 +31,11 @@ export async function POST(request: NextRequest) {
         }
 
         const { token, password } = result.data;
+        const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
         const user = await prisma.user.findFirst({
             where: {
-                resetToken: token,
+                resetToken: tokenHash,
                 resetTokenExpiry: { gt: new Date() },
             },
         });

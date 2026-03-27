@@ -1,10 +1,18 @@
 import { ArrowLeft, Wallet } from "lucide-react";
 import Link from "next/link";
 import ComptaForm from "./form";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { isDirectionRole } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
-export default function NewComptaEntry() {
+export default async function NewComptaEntry() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        redirect("/admin/dashboard");
+    }
+
     return (
         <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
             <div className="flex items-center gap-4">

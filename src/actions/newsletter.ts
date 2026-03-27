@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { auth } from "@/auth";
+import { isDirectionRole } from "@/lib/roles";
 
 const NewsletterSchema = z.object({
     email: z.string().email("Format d'email invalide"),
@@ -46,6 +48,11 @@ export async function unsubscribeNewsletter(email: string) {
 }
 
 export async function getAllSubscribers() {
+    const session = await auth();
+    if (!session?.user || !isDirectionRole(session.user.role as string)) {
+        throw new Error("Unauthorized");
+    }
+
     try {
         return await prisma.newsletter.findMany({
             orderBy: { createdAt: "desc" },

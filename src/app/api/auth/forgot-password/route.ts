@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendMail } from "@/lib/mailer";
 import crypto from "crypto";
+import { z } from "zod";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { isPortalRole } from "@/lib/roles";
+
+const ForgotSchema = z.object({ email: z.string().email("Format d'email invalide") });
 
 /**
  * POST /api/auth/forgot-password
@@ -18,21 +21,22 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const { email } = await request.json();
-
-        if (!email || typeof email !== "string") {
-            return NextResponse.json({ error: "Email requis" }, { status: 400 });
+        const parsed = ForgotSchema.safeParse(await request.json());
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Email invalide" }, { status: 400 });
         }
+        const { email } = parsed.data;
 
         const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
 
         if (user && isPortalRole(user.role)) {
             const token = crypto.randomBytes(32).toString("hex");
+            const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
             const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 heure
 
             await prisma.user.update({
                 where: { id: user.id },
-                data: { resetToken: token, resetTokenExpiry: expiry },
+                data: { resetToken: tokenHash, resetTokenExpiry: expiry },
             });
 
             const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
